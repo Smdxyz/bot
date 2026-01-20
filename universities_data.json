@@ -1,0 +1,3155 @@
+{
+  "Spain": [
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Barcelona",
+      "international_name": "University of Barcelona",
+      "domain": "ub.edu",
+      "contact_email": "sae@ub.edu",
+      "faculties": [
+        "Biology",
+        "Chemistry",
+        "Dentistry",
+        "Earth Sciences",
+        "Economics and Business",
+        "Education",
+        "Fine Arts",
+        "Geography and History",
+        "Law",
+        "Library and Information Sciences",
+        "Mathematics and Computer Sciences",
+        "Medicine and Information Sciences",
+        "Pharmacy and Food Sciences",
+        "Philology",
+        "Philosophy",
+        "Physics",
+        "Psychology"
+      ]
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Complutense de Madrid",
+      "international_name": "Complutense University of Madrid",
+      "domain": "ucm.es",
+      "contact_email": "infocom@ucm.es",
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Autónoma de Barcelona",
+      "international_name": "Autonomous University of Barcelona",
+      "domain": "uab.cat",
+      "contact_email": "informacio@uab.cat",
+      "faculties": [
+        "Biosciences",
+        "Science",
+        "Communication Studies",
+        "Education",
+        "Political Science and Sociology",
+        "Law",
+        "Economics and Business Studies",
+        "Engineering",
+        "Arts and Humanities",
+        "Medicine",
+        "Psychology and Speech Therapy",
+        "Translation and Interpreting",
+        "Veterinary Medicine"
+      ]
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Valencia",
+      "international_name": "University of Valencia",
+      "domain": "uv.es",
+      "contact_email": "fac.filosofia.i.educacio@uv.es",
+      "faculties": [
+        "Biological Sciences",
+        "Chemistry",
+        "Economics",
+        "Geography and History",
+        "Law",
+        "Mathematics",
+        "Medicine and Odontology",
+        "Nursing and Podiatry",
+        "Pharmacy and Food Sciences",
+        "Philology, Translation and Communication",
+        "Philosophy and Educational Sciences",
+        "Physical Education and Sport Sciences",
+        "Physics",
+        "Physiotherapy",
+        "Psychology and Speech Therapy",
+        "Social Sciences",
+        "Teacher Training"
+      ]
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Granada",
+      "international_name": "Universidad de Granada",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Politécnica de Madrid",
+      "international_name": "Universidad Politécnica de Madrid",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Politécnica de Cataluña",
+      "international_name": "Universidad Politécnica de Cataluña",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad del País Vasco",
+      "international_name": "Universidad del País Vasco",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Politécnica de València",
+      "international_name": "Universidad Politécnica de València",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Sevilla",
+      "international_name": "Universidad de Sevilla",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Pompeu Fabra",
+      "international_name": "Universidad Pompeu Fabra",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Autónoma de Madrid",
+      "international_name": "Universidad Autónoma de Madrid",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Alicante",
+      "international_name": "Universidad de Alicante",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Zaragoza",
+      "international_name": "Universidad de Zaragoza",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Málaga",
+      "international_name": "Universidad de Málaga",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Murcia",
+      "international_name": "Universidad de Murcia",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Carlos III de Madrid",
+      "international_name": "Universidad Carlos III de Madrid",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Salamanca",
+      "international_name": "Universidad de Salamanca",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Santiago de Compostela",
+      "international_name": "Universidad de Santiago de Compostela",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Valladolid",
+      "international_name": "Universidad de Valladolid",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Navarra",
+      "international_name": "Universidad de Navarra",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidade de Vigo",
+      "international_name": "Universidade de Vigo",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Castilla-La Mancha",
+      "international_name": "Universidad de Castilla-La Mancha",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Oviedo",
+      "international_name": "Universidad de Oviedo",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Rey Juan Carlos",
+      "international_name": "Universidad Rey Juan Carlos",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Jaime I",
+      "international_name": "Universidad Jaime I",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Las Palmas de Gran Canaria",
+      "international_name": "Universidad de Las Palmas de Gran Canaria",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Córdoba",
+      "international_name": "Universidad de Córdoba",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Rovira i Virgili",
+      "international_name": "Universidad Rovira i Virgili",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de les Illes Balears",
+      "international_name": "Universidad de les Illes Balears",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Cádiz",
+      "international_name": "Universidad de Cádiz",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Alcalá",
+      "international_name": "Universidad de Alcalá",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de La Laguna",
+      "international_name": "Universidad de La Laguna",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidade da Coruña",
+      "international_name": "Universidade da Coruña",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Cantabria",
+      "international_name": "Universidad de Cantabria",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de La Rioja",
+      "international_name": "Universidad de La Rioja",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universitat de Lleida",
+      "international_name": "Universitat de Lleida",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Pontificia Comillas",
+      "international_name": "Universidad Pontificia Comillas",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Extremadura",
+      "international_name": "Universidad de Extremadura",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Jaén",
+      "international_name": "Universidad de Jaén",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Almería",
+      "international_name": "Universidad de Almería",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de León",
+      "international_name": "Universidad de León",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Gerona",
+      "international_name": "Universidad de Gerona",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Pablo de Olavide",
+      "international_name": "Universidad Pablo de Olavide",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Deusto",
+      "international_name": "Universidad de Deusto",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Miguel Hernández de Elche",
+      "international_name": "Universidad Miguel Hernández de Elche",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad de Huelva",
+      "international_name": "Universidad de Huelva",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Pública de Navarra",
+      "international_name": "Universidad Pública de Navarra",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad CEU San Pablo",
+      "international_name": "Universidad CEU San Pablo",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Spain",
+      "university_name": "Universidad Ramon Llull",
+      "international_name": "Universidad Ramon Llull",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    }
+  ],
+  "United Kingdom": [
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Oxford",
+      "international_name": "University of Oxford",
+      "domain": "ox.ac.uk",
+      "contact_email": "news.office@admin.ox.ac.uk",
+      "faculties": [
+        "Classics",
+        "English",
+        "History",
+        "Linguistics and Phonetics",
+        "Music",
+        "Oriental Studies",
+        "Philosophy",
+        "Theology and Religion",
+        "Biochemistry",
+        "Clinical Medicine",
+        "Neurosciences"
+      ]
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Cambridge",
+      "international_name": "University of Cambridge",
+      "domain": "cam.ac.uk",
+      "contact_email": "admissions@cam.ac.uk",
+      "faculties": [
+        "Arts and Humanities",
+        "Biological Sciences",
+        "Clinical Medicine",
+        "Humanities and Social Sciences",
+        "Physical Sciences",
+        "Technology"
+      ]
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University College London",
+      "international_name": "University College London",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Edinburgh",
+      "international_name": "University of Edinburgh",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "London School of Economics and Political Science",
+      "international_name": "London School of Economics and Political Science",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Southampton",
+      "international_name": "University of Southampton",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Manchester",
+      "international_name": "University of Manchester",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Imperial College London",
+      "international_name": "Imperial College London",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Glasgow",
+      "international_name": "University of Glasgow",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Warwick",
+      "international_name": "University of Warwick",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Birmingham",
+      "international_name": "University of Birmingham",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "King's College London",
+      "international_name": "King's College London",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Leeds",
+      "international_name": "University of Leeds",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Durham University",
+      "international_name": "Durham University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Nottingham",
+      "international_name": "University of Nottingham",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of York",
+      "international_name": "University of York",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Newcastle University",
+      "international_name": "Newcastle University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Exeter",
+      "international_name": "University of Exeter",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Liverpool",
+      "international_name": "University of Liverpool",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Lancaster University",
+      "international_name": "Lancaster University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of St Andrews",
+      "international_name": "University of St Andrews",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Bristol",
+      "international_name": "University of Bristol",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Queen Mary University of London",
+      "international_name": "Queen Mary University of London",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Sheffield",
+      "international_name": "University of Sheffield",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Bath",
+      "international_name": "University of Bath",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Surrey",
+      "international_name": "University of Surrey",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Leicester",
+      "international_name": "University of Leicester",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Reading",
+      "international_name": "University of Reading",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Sussex",
+      "international_name": "University of Sussex",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of East Anglia",
+      "international_name": "University of East Anglia",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Queen's University Belfast",
+      "international_name": "Queen's University Belfast",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Cardiff University",
+      "international_name": "Cardiff University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Kent",
+      "international_name": "University of Kent",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "St George's, University of London",
+      "international_name": "St George's, University of London",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Aberdeen",
+      "international_name": "University of Aberdeen",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Strathclyde",
+      "international_name": "University of Strathclyde",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Loughborough University",
+      "international_name": "Loughborough University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Essex",
+      "international_name": "University of Essex",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Swansea University",
+      "international_name": "Swansea University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Portsmouth",
+      "international_name": "University of Portsmouth",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Heriot-Watt University",
+      "international_name": "Heriot-Watt University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Royal Holloway, University of London",
+      "international_name": "Royal Holloway, University of London",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Dundee",
+      "international_name": "University of Dundee",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Sheffield Hallam University",
+      "international_name": "Sheffield Hallam University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Nottingham Trent University",
+      "international_name": "Nottingham Trent University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Manchester Metropolitan University",
+      "international_name": "Manchester Metropolitan University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of the West of England",
+      "international_name": "University of the West of England",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "University of Plymouth",
+      "international_name": "University of Plymouth",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Brunel University London",
+      "international_name": "Brunel University London",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "United Kingdom",
+      "university_name": "Goldsmiths, University of London",
+      "international_name": "Goldsmiths, University of London",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    }
+  ],
+  "Netherlands": [
+    {
+      "country": "Netherlands",
+      "university_name": "Universiteit Utrecht",
+      "international_name": "Utrecht University",
+      "domain": "uu.nl",
+      "contact_email": "info@uu.nl",
+      "faculties": [
+        "Geosciences",
+        "Humanities",
+        "Law, Economics and Governance",
+        "Medical Science",
+        "Science",
+        "Social and Behavioural Sciences",
+        "Veterinary Medicine"
+      ]
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Universiteit van Amsterdam",
+      "international_name": "Universiteit van Amsterdam",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Universiteit Leiden",
+      "international_name": "Universiteit Leiden",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Technische Universiteit Delft",
+      "international_name": "Technische Universiteit Delft",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Rijksuniversiteit Groningen",
+      "international_name": "Rijksuniversiteit Groningen",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Vrije Universiteit Amsterdam",
+      "international_name": "Vrije Universiteit Amsterdam",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Universiteit Twente",
+      "international_name": "Universiteit Twente",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Wageningen Universiteit",
+      "international_name": "Wageningen Universiteit",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Technische Universiteit Eindhoven",
+      "international_name": "Technische Universiteit Eindhoven",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Radboud Universiteit",
+      "international_name": "Radboud University",
+      "domain": "ru.nl",
+      "contact_email": "study-information@ru.nl",
+      "faculties": [
+        "Philosophy, Theology and Religious Studies",
+        "Arts",
+        "Nijmegen School of Management",
+        "Medical Sciences",
+        "Science",
+        "Law",
+        "Social Sciences"
+      ]
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Erasmus Universiteit Rotterdam",
+      "international_name": "Erasmus Universiteit Rotterdam",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Tilburg University",
+      "international_name": "Tilburg University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Universiteit Maastricht",
+      "international_name": "Universiteit Maastricht",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool van Amsterdam",
+      "international_name": "Hogeschool van Amsterdam",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Fontys Hogescholen",
+      "international_name": "Fontys Hogescholen",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool Utrecht",
+      "international_name": "Hogeschool Utrecht",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hanzehogeschool Groningen",
+      "international_name": "Hanzehogeschool Groningen",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool van Arnhem en Nijmegen",
+      "international_name": "Hogeschool van Arnhem en Nijmegen",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "AVANS Hogeschool",
+      "international_name": "AVANS Hogeschool",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "NHL Stenden Hogeschool",
+      "international_name": "NHL Stenden Hogeschool",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool Saxion",
+      "international_name": "Hogeschool Saxion",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool Rotterdam",
+      "international_name": "Hogeschool Rotterdam",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool Windesheim",
+      "international_name": "Hogeschool Windesheim",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool INHolland",
+      "international_name": "Hogeschool INHolland",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool voor de Kunsten Utrecht",
+      "international_name": "Hogeschool voor de Kunsten Utrecht",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Zuyd Hogeschool",
+      "international_name": "Zuyd Hogeschool",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Amsterdamse Hogeschool voor de Kunsten",
+      "international_name": "Amsterdamse Hogeschool voor de Kunsten",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "ArtEZ Hogeschool voor de kunsten",
+      "international_name": "ArtEZ Hogeschool voor de kunsten",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "De Haagse Hogeschool",
+      "international_name": "De Haagse Hogeschool",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Breda University of Applied Sciences",
+      "international_name": "Breda University of Applied Sciences",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Nyenrode Business Universiteit",
+      "international_name": "Nyenrode Business Universiteit",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "IHE Delft Institute for Water Education",
+      "international_name": "IHE Delft Institute for Water Education",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Design Academy Eindhoven",
+      "international_name": "Design Academy Eindhoven",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "HAS Hogeschool",
+      "international_name": "HAS Hogeschool",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool Zeeland",
+      "international_name": "Hogeschool Zeeland",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool Leiden",
+      "international_name": "Hogeschool Leiden",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Koninklijke Academie van Beeldende Kunsten",
+      "international_name": "Koninklijke Academie van Beeldende Kunsten",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Van Hall Larenstein University of Applied Sciences",
+      "international_name": "Van Hall Larenstein University of Applied Sciences",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Gerrit Rietveld Academie",
+      "international_name": "Gerrit Rietveld Academie",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Aeres Hogeschool",
+      "international_name": "Aeres Hogeschool",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "TIAS School for Business and Society",
+      "international_name": "TIAS School for Business and Society",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Universiteit voor Humanistiek",
+      "international_name": "Universiteit voor Humanistiek",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Codarts Rotterdam",
+      "international_name": "Codarts Rotterdam",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Christelijke Hogeschool Ede",
+      "international_name": "Christelijke Hogeschool Ede",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hotelschool The Hague",
+      "international_name": "Hotelschool The Hague",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Iselinge Hogeschool",
+      "international_name": "Iselinge Hogeschool",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool Viaa",
+      "international_name": "Hogeschool Viaa",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Wittenborg University of Applied Sciences",
+      "international_name": "Wittenborg University of Applied Sciences",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool de Kempel",
+      "international_name": "Hogeschool de Kempel",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Netherlands",
+      "university_name": "Hogeschool KPZ",
+      "international_name": "Hogeschool KPZ",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    }
+  ],
+  "France": [
+    {
+      "country": "France",
+      "university_name": "Université de Strasbourg",
+      "international_name": "Université de Strasbourg",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Paris",
+      "international_name": "Université de Paris",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Lille",
+      "international_name": "Université de Lille",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Sorbonne Université",
+      "international_name": "Sorbonne University",
+      "domain": "sorbonne-universite.fr",
+      "contact_email": null,
+      "faculties": [
+        "Arts and Humanities",
+        "Medicine",
+        "Science and Engineering"
+      ]
+    },
+    {
+      "country": "France",
+      "university_name": "Université Grenoble Alpes",
+      "international_name": "Université Grenoble Alpes",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Lorraine",
+      "international_name": "Université de Lorraine",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "École Normale Supérieure",
+      "international_name": "École Normale Supérieure",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Bordeaux",
+      "international_name": "Université de Bordeaux",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Claude Bernard Lyon 1",
+      "international_name": "Université Claude Bernard Lyon 1",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Côte d'Azur",
+      "international_name": "Université Côte d'Azur",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Paris-Saclay",
+      "international_name": "Université Paris-Saclay",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "École Normale Supérieure de Lyon",
+      "international_name": "École Normale Supérieure de Lyon",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Montpellier",
+      "international_name": "Université de Montpellier",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Institut d'Études Politiques de Paris",
+      "international_name": "Institut d'Études Politiques de Paris",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Paris 1 Panthéon-Sorbonne",
+      "international_name": "Université Paris 1 Panthéon-Sorbonne",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Aix-Marseille Université",
+      "international_name": "Aix-Marseille Université",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "École Polytechnique",
+      "international_name": "École Polytechnique",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Caen Normandie",
+      "international_name": "Université de Caen Normandie",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Nantes Université",
+      "international_name": "Nantes Université",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Bourgogne-Europe",
+      "international_name": "Université Bourgogne-Europe",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "École Centrale de Lyon",
+      "international_name": "École Centrale de Lyon",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Paris Nanterre",
+      "international_name": "Université Paris Nanterre",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Clermont Auvergne",
+      "international_name": "Université Clermont Auvergne",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Poitiers",
+      "international_name": "Université de Poitiers",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Tours",
+      "international_name": "Université de Tours",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Lumière Lyon 2",
+      "international_name": "Université Lumière Lyon 2",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Toulouse III - Paul Sabatier",
+      "international_name": "Université Toulouse III - Paul Sabatier",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Gustave Eiffel",
+      "international_name": "Université Gustave Eiffel",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Franche-Comté",
+      "international_name": "Université de Franche-Comté",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Paris 8 Vincennes-Saint-Denis",
+      "international_name": "Université Paris 8 Vincennes-Saint-Denis",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université d'Angers",
+      "international_name": "Université d'Angers",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "École des Hautes Études en Sciences Sociales",
+      "international_name": "École des Hautes Études en Sciences Sociales",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Toulouse - Jean Jaurès",
+      "international_name": "Université Toulouse - Jean Jaurès",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "CentraleSupélec",
+      "international_name": "CentraleSupélec",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Sorbonne Paris Nord",
+      "international_name": "Université Sorbonne Paris Nord",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Paris-Dauphine",
+      "international_name": "Université Paris-Dauphine",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "HEC Paris",
+      "international_name": "HEC Paris",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Grenoble INP",
+      "international_name": "Grenoble INP",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Rennes 2",
+      "international_name": "Université Rennes 2",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Télécom Paris",
+      "international_name": "Télécom Paris",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Mines Paris",
+      "international_name": "Mines Paris",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Bretagne Occidentale",
+      "international_name": "Université de Bretagne Occidentale",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Limoges",
+      "international_name": "Université de Limoges",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "IMT Atlantique",
+      "international_name": "IMT Atlantique",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "CY Cergy Paris Université",
+      "international_name": "CY Cergy Paris Université",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Rouen Normandie",
+      "international_name": "Université de Rouen Normandie",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Paris-Est Créteil Val de Marne",
+      "international_name": "Université Paris-Est Créteil Val de Marne",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université Sorbonne Nouvelle - Paris 3",
+      "international_name": "Université Sorbonne Nouvelle - Paris 3",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Versailles Saint-Quentin-en-Yvelines",
+      "international_name": "Université de Versailles Saint-Quentin-en-Yvelines",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "France",
+      "university_name": "Université de Picardie Jules Verne",
+      "international_name": "Université de Picardie Jules Verne",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    }
+  ],
+  "Australia": [
+    {
+      "country": "Australia",
+      "university_name": "University of New South Wales",
+      "international_name": "University of New South Wales",
+      "domain": "unsw.edu.au",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "The University of Sydney",
+      "international_name": "University of Sydney",
+      "domain": "sydney.edu.au",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Monash University",
+      "international_name": "Monash University",
+      "domain": "monash.edu",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "The University of Melbourne",
+      "international_name": "University of Melbourne",
+      "domain": "unimelb.edu.au",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "The University of Queensland",
+      "international_name": "The University of Queensland",
+      "domain": "uq.edu.au",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Australian National University",
+      "international_name": "Australian National University",
+      "domain": "anu.edu.au",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "The University of Adelaide",
+      "international_name": "The University of Adelaide",
+      "domain": "adelaide.edu.au",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "The University of Western Australia",
+      "international_name": "The University of Western Australia",
+      "domain": "uwa.edu.au",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "University of Technology Sydney",
+      "international_name": "University of Technology Sydney",
+      "domain": "uts.edu.au",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Macquarie University",
+      "international_name": "Macquarie University",
+      "domain": "mq.edu.au",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "RMIT University",
+      "international_name": "RMIT University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Queensland University of Technology",
+      "international_name": "Queensland University of Technology",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Deakin University",
+      "international_name": "Deakin University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Griffith University",
+      "international_name": "Griffith University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Swinburne University of Technology",
+      "international_name": "Swinburne University of Technology",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "University of Wollongong",
+      "international_name": "University of Wollongong",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Western Sydney University",
+      "international_name": "Western Sydney University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Curtin University",
+      "international_name": "Curtin University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "La Trobe University",
+      "international_name": "La Trobe University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "University of South Australia",
+      "international_name": "University of South Australia",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "University of Tasmania",
+      "international_name": "University of Tasmania",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "The University of Newcastle",
+      "international_name": "The University of Newcastle",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "James Cook University",
+      "international_name": "James Cook University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Flinders University",
+      "international_name": "Flinders University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Charles Sturt University",
+      "international_name": "Charles Sturt University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Murdoch University",
+      "international_name": "Murdoch University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Edith Cowan University",
+      "international_name": "Edith Cowan University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Victoria University",
+      "international_name": "Victoria University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "University of New England",
+      "international_name": "University of New England",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "University of Southern Queensland",
+      "international_name": "University of Southern Queensland",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "University of Canberra",
+      "international_name": "University of Canberra",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Southern Cross University",
+      "international_name": "Southern Cross University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Australian Catholic University",
+      "international_name": "Australian Catholic University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Central Queensland University",
+      "international_name": "Central Queensland University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Bond University",
+      "international_name": "Bond University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "University of the Sunshine Coast",
+      "international_name": "University of the Sunshine Coast",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Charles Darwin University",
+      "international_name": "Charles Darwin University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Federation University Australia",
+      "international_name": "Federation University Australia",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "The University of Notre Dame Australia",
+      "international_name": "The University of Notre Dame Australia",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Torrens University Australia",
+      "international_name": "Torrens University Australia",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "University of Divinity",
+      "international_name": "University of Divinity",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Carnegie Mellon University – Australia",
+      "international_name": "Carnegie Mellon University – Australia",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Kaplan Business School",
+      "international_name": "Kaplan Business School",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Holmes Institute",
+      "international_name": "Holmes Institute",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "International College of Management, Sydney",
+      "international_name": "International College of Management, Sydney",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Australian Institute of Business",
+      "international_name": "Australian Institute of Business",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Australian National Institute of Business and Technology",
+      "international_name": "Australian National Institute of Business and Technology",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Taylors College",
+      "international_name": "Taylors College",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Blue Mountains International Hotel Management School",
+      "international_name": "Blue Mountains International Hotel Management School",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Australia",
+      "university_name": "Australian Institute of Music",
+      "international_name": "Australian Institute of Music",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    }
+  ],
+  "Canada": [
+    {
+      "country": "Canada",
+      "university_name": "University of Toronto",
+      "international_name": "University of Toronto",
+      "domain": "utoronto.ca",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "The University of British Columbia",
+      "international_name": "The University of British Columbia",
+      "domain": "ubc.ca",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "McGill University",
+      "international_name": "McGill University",
+      "domain": "mcgill.ca",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Waterloo",
+      "international_name": "University of Waterloo",
+      "domain": "uwaterloo.ca",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Alberta",
+      "international_name": "University of Alberta",
+      "domain": "ualberta.ca",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Simon Fraser University",
+      "international_name": "Simon Fraser University",
+      "domain": "sfu.ca",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Calgary",
+      "international_name": "University of Calgary",
+      "domain": "ucalgary.ca",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Université de Montréal",
+      "international_name": "Université de Montréal",
+      "domain": "umontreal.ca",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "York University",
+      "international_name": "York University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Université Laval",
+      "international_name": "Université Laval",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Western University",
+      "international_name": "Western University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Queen's University",
+      "international_name": "Queen's University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Victoria",
+      "international_name": "University of Victoria",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "McMaster University",
+      "international_name": "McMaster University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Toronto Metropolitan University",
+      "international_name": "Toronto Metropolitan University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Carleton University",
+      "international_name": "Carleton University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Guelph",
+      "international_name": "University of Guelph",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Ottawa",
+      "international_name": "University of Ottawa",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Concordia University",
+      "international_name": "Concordia University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Saskatchewan",
+      "international_name": "University of Saskatchewan",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Université du Québec à Montréal",
+      "international_name": "Université du Québec à Montréal",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Dalhousie University",
+      "international_name": "Dalhousie University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Manitoba",
+      "international_name": "University of Manitoba",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Memorial University of Newfoundland",
+      "international_name": "Memorial University of Newfoundland",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Université de Sherbrooke",
+      "international_name": "Université de Sherbrooke",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of New Brunswick",
+      "international_name": "University of New Brunswick",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Wilfrid Laurier University",
+      "international_name": "Wilfrid Laurier University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Brock University",
+      "international_name": "Brock University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Windsor",
+      "international_name": "University of Windsor",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "École Polytechnique de Montréal",
+      "international_name": "École Polytechnique de Montréal",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Regina",
+      "international_name": "University of Regina",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "British Columbia Institute of Technology",
+      "international_name": "British Columbia Institute of Technology",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "The University of Winnipeg",
+      "international_name": "The University of Winnipeg",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "HEC Montréal",
+      "international_name": "HEC Montréal",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Lethbridge",
+      "international_name": "University of Lethbridge",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Université du Québec",
+      "international_name": "Université du Québec",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Université du Québec à Chicoutimi",
+      "international_name": "Université du Québec à Chicoutimi",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Acadia University",
+      "international_name": "Acadia University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Trent University",
+      "international_name": "Trent University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "École de Technologie Supérieure",
+      "international_name": "École de Technologie Supérieure",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Ontario Tech University",
+      "international_name": "Ontario Tech University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Lakehead University",
+      "international_name": "Lakehead University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Vancouver Island University",
+      "international_name": "Vancouver Island University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Thompson Rivers University",
+      "international_name": "Thompson Rivers University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "OCAD University",
+      "international_name": "OCAD University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "St. Francis Xavier University",
+      "international_name": "St. Francis Xavier University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "University of Prince Edward Island",
+      "international_name": "University of Prince Edward Island",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Mount Allison University",
+      "international_name": "Mount Allison University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "MacEwan University",
+      "international_name": "MacEwan University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Canada",
+      "university_name": "Laurentian University",
+      "international_name": "Laurentian University",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    }
+  ],
+  "Argentina": [
+    {
+      "country": "Argentina",
+      "university_name": "Universidad de Buenos Aires",
+      "international_name": "Universidad de Buenos Aires",
+      "domain": "uba.ar",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de La Plata",
+      "international_name": "Universidad Nacional de La Plata",
+      "domain": "unlp.edu.ar",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Córdoba",
+      "international_name": "Universidad Nacional de Córdoba",
+      "domain": "unc.edu.ar",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Tecnológica Nacional",
+      "international_name": "Universidad Tecnológica Nacional",
+      "domain": "frba.utn.edu.ar",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Rosario",
+      "international_name": "Universidad Nacional de Rosario",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional del Litoral",
+      "international_name": "Universidad Nacional del Litoral",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Cuyo",
+      "international_name": "Universidad Nacional de Cuyo",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Pontificia Universidad Católica Argentina",
+      "international_name": "Pontificia Universidad Católica Argentina",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional del Nordeste",
+      "international_name": "Universidad Nacional del Nordeste",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Mar del Plata",
+      "international_name": "Universidad Nacional de Mar del Plata",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de San Martín, Argentina",
+      "international_name": "Universidad Nacional de San Martín, Argentina",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad de Palermo",
+      "international_name": "Universidad de Palermo",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Tucumán",
+      "international_name": "Universidad Nacional de Tucumán",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional del Sur",
+      "international_name": "Universidad Nacional del Sur",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional del Centro de la Provincia de Buenos Aires",
+      "international_name": "Universidad Nacional del Centro de la Provincia de Buenos Aires",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Quilmes",
+      "international_name": "Universidad Nacional de Quilmes",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional del Comahue",
+      "international_name": "Universidad Nacional del Comahue",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Salta",
+      "international_name": "Universidad Nacional de Salta",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Torcuato di Tella",
+      "international_name": "Universidad Torcuato di Tella",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Argentina de la Empresa",
+      "international_name": "Universidad Argentina de la Empresa",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Católica de Salta",
+      "international_name": "Universidad Católica de Salta",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de La Matanza",
+      "international_name": "Universidad Nacional de La Matanza",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de San Luis",
+      "international_name": "Universidad Nacional de San Luis",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Facultad Latinoamericana de Ciencias Sociales",
+      "international_name": "Facultad Latinoamericana de Ciencias Sociales",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Entre Ríos",
+      "international_name": "Universidad Nacional de Entre Ríos",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Austral",
+      "international_name": "Universidad Austral",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Empresarial Siglo 21",
+      "international_name": "Universidad Empresarial Siglo 21",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad de San Andrés",
+      "international_name": "Universidad de San Andrés",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad de Ciencias Empresariales y Sociales",
+      "international_name": "Universidad de Ciencias Empresariales y Sociales",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Tres de Febrero",
+      "international_name": "Universidad Nacional de Tres de Febrero",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad del Salvador",
+      "international_name": "Universidad del Salvador",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de San Juan",
+      "international_name": "Universidad Nacional de San Juan",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Misiones",
+      "international_name": "Universidad Nacional de Misiones",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad FASTA",
+      "international_name": "Universidad FASTA",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de General Sarmiento",
+      "international_name": "Universidad Nacional de General Sarmiento",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de La Pampa",
+      "international_name": "Universidad Nacional de La Pampa",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Río Cuarto",
+      "international_name": "Universidad Nacional de Río Cuarto",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Abierta Interamericana",
+      "international_name": "Universidad Abierta Interamericana",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Luján",
+      "international_name": "Universidad Nacional de Luján",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad de Belgrano",
+      "international_name": "Universidad de Belgrano",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Lanús",
+      "international_name": "Universidad Nacional de Lanús",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Santiago del Estero",
+      "international_name": "Universidad Nacional de Santiago del Estero",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de las Artes",
+      "international_name": "Universidad Nacional de las Artes",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de la Patagonia San Juan Bosco",
+      "international_name": "Universidad Nacional de la Patagonia San Juan Bosco",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Río Negro",
+      "international_name": "Universidad Nacional de Río Negro",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Instituto Tecnológico de Buenos Aires",
+      "international_name": "Instituto Tecnológico de Buenos Aires",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Blas Pascal",
+      "international_name": "Universidad Blas Pascal",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Católica de Córdoba",
+      "international_name": "Universidad Católica de Córdoba",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Lomas de Zamora",
+      "international_name": "Universidad Nacional de Lomas de Zamora",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Argentina",
+      "university_name": "Universidad Nacional de Jujuy",
+      "international_name": "Universidad Nacional de Jujuy",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    }
+  ],
+  "Slovakia": [
+    {
+      "country": "Slovakia",
+      "university_name": "Univerzita Komenského v Bratislave",
+      "international_name": "Comenius University in Bratislava",
+      "domain": "uniba.sk",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Slovenská technická univerzita v Bratislave",
+      "international_name": "Slovak University of Technology in Bratislava",
+      "domain": "stuba.sk",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Technická univerzita v Košiciach",
+      "international_name": "Technical University of Košice",
+      "domain": "tuke.sk",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Univerzita Pavla Jozefa Šafárika v Košiciach",
+      "international_name": "Pavol Jozef Šafárik University in Košice",
+      "domain": "upjs.sk",
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Žilinská univerzita v Žiline",
+      "international_name": "Žilinská univerzita v Žiline",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Univerzita Mateja Bela v Banskej Bystrici",
+      "international_name": "Univerzita Mateja Bela v Banskej Bystrici",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Slovenská polnohospodárska univerzita v Nitre",
+      "international_name": "Slovenská polnohospodárska univerzita v Nitre",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Univerzita Konštantína Filozofa v Nitre",
+      "international_name": "Univerzita Konštantína Filozofa v Nitre",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Ekonomická univerzita v Bratislave",
+      "international_name": "Ekonomická univerzita v Bratislave",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Prešovská univerzita v Prešove",
+      "international_name": "Prešovská univerzita v Prešove",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Trnavská univerzita v Trnave",
+      "international_name": "Trnavská univerzita v Trnave",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Technická univerzita vo Zvolene",
+      "international_name": "Technická univerzita vo Zvolene",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Univerzita sv. Cyrila a Metoda v Trnave",
+      "international_name": "Univerzita sv. Cyrila a Metoda v Trnave",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Katolická Univerzita v Ružomberku",
+      "international_name": "Katolická Univerzita v Ružomberku",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Univerzita veterinárskeho lekárstva a farmácie v Košiciach",
+      "international_name": "Univerzita veterinárskeho lekárstva a farmácie v Košiciach",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Vysoká škola výtvarných umení v Bratislave",
+      "international_name": "Vysoká škola výtvarných umení v Bratislave",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Trenčianska Univerzita Alexandra Dubčeka v Trenčíne",
+      "international_name": "Trenčianska Univerzita Alexandra Dubčeka v Trenčíne",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Univerzita J. Selyeho",
+      "international_name": "Univerzita J. Selyeho",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Vysoká škola múzických umení v Bratislave",
+      "international_name": "Vysoká škola múzických umení v Bratislave",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Paneurópska vysoká škola",
+      "international_name": "Paneurópska vysoká škola",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Akadémia umení v Banskej Bystrici",
+      "international_name": "Akadémia umení v Banskej Bystrici",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Vysoká škola ekonómie a manažmentu verejnej správy v Bratislave",
+      "international_name": "Vysoká škola ekonómie a manažmentu verejnej správy v Bratislave",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Vysoká škola zdravotníctva a sociálnej práce sv. Alžbety v Bratislave",
+      "international_name": "Vysoká škola zdravotníctva a sociálnej práce sv. Alžbety v Bratislave",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Vysoká škola medzinárodného podnikania ISM Slovakia v Prešove",
+      "international_name": "Vysoká škola medzinárodného podnikania ISM Slovakia v Prešove",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Vysoká škola manažmentu, City University of Seattle",
+      "international_name": "Vysoká škola manažmentu, City University of Seattle",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Vysoká škola Danubius",
+      "international_name": "Vysoká škola Danubius",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Vysoká škola bezpečnostného manažérstva v Košiciach",
+      "international_name": "Vysoká škola bezpečnostného manažérstva v Košiciach",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Vysoká škola DTI",
+      "international_name": "Vysoká škola DTI",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Slovenská zdravotnícka univerzita v Bratislave",
+      "international_name": "Slovenská zdravotnícka univerzita v Bratislave",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Bratislavská medzinárodná škola liberálnych štúdií",
+      "international_name": "Bratislavská medzinárodná škola liberálnych štúdií",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    },
+    {
+      "country": "Slovakia",
+      "university_name": "Hudobná a umelecká akadémia Jána Albrechta",
+      "international_name": "Hudobná a umelecká akadémia Jána Albrechta",
+      "domain": null,
+      "contact_email": null,
+      "faculties": null
+    }
+  ]
+}
