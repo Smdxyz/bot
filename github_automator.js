@@ -3,7 +3,6 @@
 import { HttpSession, extractInputValue, extractAllInputs } from './helpers.js';
 import { generateSemiAuto } from './lib/randomizer.js';
 import { drawKTM } from './lib/painter.js';
-import { totp } from 'otplib';
 import { fakerID_ID as faker } from '@faker-js/faker';
 
 export class GitHubAutomator {
@@ -16,16 +15,16 @@ export class GitHubAutomator {
         
         this.session = new HttpSession();
 
-        // Data Konsisten
+        // --- 1. GENERATE DATA KONSISTEN (SEKALI SAJA DI SINI) ---
         const sex = Math.random() > 0.5 ? 'male' : 'female';
         const firstName = faker.person.firstName(sex);
         const lastName = faker.person.lastName(sex);
         
-        this.profile = {
-            fullName: `${firstName} ${lastName}`.toUpperCase(),
-            gender: sex === 'male' ? 'pria' : 'wanita'
-        };
+        // Nama Lengkap untuk Profile & KTM
+        this.fullName = `${firstName} ${lastName}`.toUpperCase();
+        this.gender = sex === 'male' ? 'pria' : 'wanita';
 
+        // Data Billing (Nama Depan & Belakang dipisah tapi dari sumber yang sama)
         this.billingInfo = {
             firstName: firstName.toUpperCase(),
             lastName: lastName.toUpperCase(),
@@ -36,7 +35,7 @@ export class GitHubAutomator {
             postalCode: "40131",
         };
 
-        this.log(`Target: ${this.profile.fullName} | Email: ${this.email}`);
+        this.log(`♻️ Data Konsisten Dibuat: ${this.fullName} (${this.email})`);
     }
 
     async log(message) {
@@ -46,7 +45,8 @@ export class GitHubAutomator {
 
     async run() {
         try {
-            await this.log("🔑 Memulai Login (Got-Scraping)...");
+            // 1. LOGIN
+            await this.log("🔑 Memulai Login...");
             const needsVerification = await this._login();
             
             if (needsVerification) {
@@ -55,25 +55,26 @@ export class GitHubAutomator {
                 if (!otp) throw new Error("Timeout menunggu OTP.");
                 await this._submitDeviceVerification(otp);
             }
-            await this.log("✅ Login Sukses & Sesi Tersimpan.");
+            await this.log("✅ Login Sukses.");
 
-            await this.log("📝 Mengatur Profil & Billing...");
+            // 2. SET PROFILE & BILLING (WAJIB SAMA)
+            await this.log(`📝 Update Profile: ${this.fullName}`);
             await this._updateProfile();
+            
+            await this.log(`💳 Update Billing: ${this.billingInfo.firstName} ${this.billingInfo.lastName}`);
             await this._updateBilling();
             
-            await this.log("🛡️ Setup 2FA (TOTP)...");
-            const { setupKey, recoveryCodes } = await this._enable2FA();
+            // 3. SKIP 2FA (Bypass sesuai request)
+            await this.log("⏩ Skip Setup 2FA (Sesuai instruksi)...");
+            // const { setupKey, recoveryCodes } = await this._enable2FA(); // DI-COMMENT DULU
             
-            const fileContent = `Username: ${this.username}\nPassword: ${this.password}\n2FA Secret: ${setupKey}\n\nRecovery Codes:\n${recoveryCodes.join('\n')}`;
-            await this.ctx.replyWithDocument(
-                { source: Buffer.from(fileContent), filename: `GH_${this.username}_SECURE.txt` },
-                { caption: "🔐 *AKUN DIAMANKAN!* Simpan file ini." }
-            );
-
-            await this.log("🎓 Mengajukan Student Pack (NU Surakarta)...");
+            // 4. APPLY EDUCATION (VERIFIKASI)
+            await this.log("🎓 Memulai Pendaftaran Student Pack...");
+            // Catatan: Jika akun belum aktif 2FA, GitHub mungkin akan redirect ke halaman setup 2FA
+            // saat mencoba akses halaman education. Kita coba saja.
             await this._applyForEducation();
             
-            await this.log("🎉 *SELESAI!* Cek status di https://github.com/education/benefits");
+            await this.log("🎉 *SELESAI!* Silakan cek email/status.");
             return { success: true };
 
         } catch (error) {
@@ -125,7 +126,8 @@ export class GitHubAutomator {
         const page = await this.session.get('https://github.com/settings/profile');
         const formInputs = extractAllInputs(page.body, 'form.edit_user');
         
-        formInputs['user[profile_name]'] = this.profile.fullName;
+        // PENTING: Pakai nama konsisten yang di-generate di constructor
+        formInputs['user[profile_name]'] = this.fullName;
         formInputs['_method'] = 'put'; 
 
         await this.session.post(`https://github.com/users/${this.username}`, new URLSearchParams(formInputs).toString());
@@ -135,8 +137,11 @@ export class GitHubAutomator {
         const page = await this.session.get('https://github.com/settings/billing/payment_information');
         const formInputs = extractAllInputs(page.body, 0); 
 
+        // PENTING: Pakai nama konsisten dari constructor
         formInputs['billing_contact[first_name]'] = this.billingInfo.firstName;
         formInputs['billing_contact[last_name]'] = this.billingInfo.lastName;
+        
+        // Data alamat statis (bisa diubah di constructor)
         formInputs['billing_contact[address1]'] = this.billingInfo.address1;
         formInputs['billing_contact[city]'] = this.billingInfo.city;
         formInputs['billing_contact[country_code]'] = this.billingInfo.country;
@@ -147,87 +152,25 @@ export class GitHubAutomator {
         await this.session.post('https://github.com/account/contact', new URLSearchParams(formInputs).toString());
     }
 
-    // --- BAGIAN INI YANG DIPERBAIKI ---
-    async _enable2FA() {
-        // 1. GET Intro Page (UNTUK AMBIL TOKEN)
-        const introRes = await this.session.get('https://github.com/settings/two_factor_authentication/setup/intro');
-        
-        // Ambil token dari form di halaman intro
-        // Token ini wajib dibawa saat request ke /setup/app
-        const formInputs = extractAllInputs(introRes.body);
-        const token = formInputs.authenticity_token;
-        
-        if (!token) {
-            // Fallback: coba cari pake regex manual kalau extractAllInputs gagal di halaman ini
-            const match = introRes.body.match(/name="authenticity_token" value="([^"]+)"/);
-            if(!match) throw new Error("Gagal mengambil token CSRF dari halaman 2FA Intro");
-        }
-
-        // 2. Setup App (POST dengan TOKEN)
-        const appRes = await this.session.client.post('https://github.com/settings/two_factor_authentication/setup/app', {
-            body: new URLSearchParams({
-                authenticity_token: token || formInputs.authenticity_token
-            }).toString(),
-            headers: { 
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-        
-        // Cek apakah response JSON
-        let appData;
-        try {
-            appData = JSON.parse(appRes.body);
-        } catch (e) {
-            console.error("2FA Setup Error Body:", appRes.body.substring(0, 200));
-            throw new Error("Gagal memulai 2FA. GitHub mengembalikan HTML, bukan JSON.");
-        }
-
-        const secret = appData.mashed_secret;
-        if (!secret) throw new Error('Gagal mendapatkan 2FA Secret.');
-
-        // 3. Generate TOTP
-        const code = totp.generate(secret);
-        const verifyToken = extractInputValue(appData.html_content, 'authenticity_token');
-
-        // 4. Verifikasi
-        const verifyRes = await this.session.client.post('https://github.com/settings/two_factor_authentication/setup/verify', {
-            body: new URLSearchParams({
-                authenticity_token: verifyToken,
-                otp: code,
-                type: 'app'
-            }).toString(),
-            headers: { 
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        const verifyData = JSON.parse(verifyRes.body);
-        if (!verifyData.formatted_recovery_codes) throw new Error('Gagal verifikasi TOTP.');
-
-        // 5. Final Enable
-        const enableToken = extractInputValue(verifyData.html_content, 'authenticity_token');
-        await this.session.post('https://github.com/settings/two_factor_authentication/setup/enable', new URLSearchParams({
-            authenticity_token: enableToken
-        }).toString());
-
-        return { setupKey: secret, recoveryCodes: verifyData.formatted_recovery_codes };
-    }
-
     async _applyForEducation() {
         const schoolName = "NU University of Surakarta";
         const schoolId = "82921"; 
 
+        // 1. Load Halaman Benefits
         const page1 = await this.session.get('https://github.com/settings/education/benefits');
+        
+        // Cek apakah diredirect ke 2FA setup (karena kita skip 2FA)
+        if (page1.url.includes('two_factor_authentication/setup')) {
+            throw new Error("⛔ Akun ini BELUM 2FA. GitHub mewajibkan 2FA untuk daftar Edu. Silakan aktifkan manual atau nyalakan fitur 2FA di bot.");
+        }
+
         const formInputs1 = extractAllInputs(page1.body);
 
         formInputs1['dev_pack_form[application_type]'] = 'student';
         formInputs1['dev_pack_form[school_name]'] = schoolName;
         formInputs1['dev_pack_form[selected_school_id]'] = schoolId;
         formInputs1['dev_pack_form[school_email]'] = this.email;
+        // Lokasi Hardcoded sesuai request
         formInputs1['dev_pack_form[latitude]'] = '-7.570020342507728';
         formInputs1['dev_pack_form[longitude]'] = '110.80568597565748';
         formInputs1['dev_pack_form[location_shared]'] = 'true';
@@ -242,12 +185,16 @@ export class GitHubAutomator {
             }
         });
 
-        await this.log("🖼️ Menggambar Bukti KTM...");
+        // 2. Generate Bukti KTM (Base64) - Nama DIJAMIN SAMA dengan Profil
+        await this.log(`🖼️ Menggambar Bukti KTM atas nama: ${this.fullName}...`);
+        
         const ktmData = generateSemiAuto({
             univName: "NU UNIVERSITY OF SURAKARTA",
-            fullName: this.profile.fullName,
-            gender: this.profile.gender
+            fullName: this.fullName, // <-- KONSISTENSI DI SINI
+            gender: this.gender      // <-- KONSISTENSI DI SINI
         });
+        
+        // Generate gambar
         const imgBuffer = await drawKTM(ktmData);
         const base64Img = imgBuffer.toString('base64');
 
@@ -256,20 +203,26 @@ export class GitHubAutomator {
             metadata: { filename: "proof.jpg", type: "upload", mimeType: "image/jpeg", deviceLabel: null }
         });
 
+        // 3. Siapkan Payload Final
+        // Ambil token baru dari response step 1
         const formInputs2 = extractAllInputs(res1.body);
         
+        // Gabungkan data penting dari step 1 ke step 2 (Wajib dibawa ulang)
         formInputs2['dev_pack_form[school_name]'] = schoolName;
         formInputs2['dev_pack_form[selected_school_id]'] = schoolId;
         formInputs2['dev_pack_form[school_email]'] = this.email;
         formInputs2['dev_pack_form[latitude]'] = '-7.570020342507728';
         formInputs2['dev_pack_form[longitude]'] = '110.80568597565748';
         formInputs2['dev_pack_form[location_shared]'] = 'true';
+        formInputs2['dev_pack_form[application_type]'] = 'student';
         
+        // Data Baru Step 2
         formInputs2['dev_pack_form[proof_type]'] = '1. Dated school ID - Good';
         formInputs2['dev_pack_form[photo_proof]'] = photoData;
         formInputs2['dev_pack_form[form_variant]'] = 'upload_proof_form';
         formInputs2['submit'] = 'Submit Application';
 
+        // 4. POST Step 2 (Final)
         const finalRes = await this.session.client.post('https://github.com/settings/education/developer_pack_applications', {
             body: new URLSearchParams(formInputs2).toString(),
             headers: {
@@ -282,7 +235,11 @@ export class GitHubAutomator {
             return true;
         } else {
             console.log("GAGAL EDU (Snippet):", finalRes.body.substring(0, 300));
-            throw new Error('Gagal Submit Edu. Mungkin IP/Akun ditandai atau email ditolak.');
+            // Cek apakah ditolak karena 2FA
+            if (finalRes.body.includes('two-factor')) {
+                throw new Error('Gagal: GitHub mewajibkan 2FA aktif sebelum submit.');
+            }
+            throw new Error('Gagal Submit Edu. Cek log console untuk detail HTML.');
         }
     }
 }
