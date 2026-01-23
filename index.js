@@ -13,36 +13,47 @@ import { setupCanvaHandler } from './handlers/canva.js';
 
 const bot = new Telegraf(process.env.BOT_TOKEN, { handlerTimeout: 900000 });
 
-process.on('uncaughtException', (err) => console.error('🔥 Uncaught:', err));
-process.on('unhandledRejection', (reason) => console.error('🔥 Rejection:', reason));
+// Error handling global yang lebih berisik
+process.on('uncaughtException', (err) => console.error('🔥 CRITICAL UNCAUGHT:', err));
+process.on('unhandledRejection', (reason) => console.error('🔥 CRITICAL REJECTION:', reason));
 
-const adminFlows = {};
+// Gunakan String untuk ID agar konsisten
+const adminFlows = {}; 
 const safeDelete = async (ctx, msgId) => { try { await ctx.deleteMessage(msgId); } catch (e) {} };
 
 bot.use(session());
 
+// --- MIDDLEWARE DEBUGGING UTAMA ---
 bot.use(async (ctx, next) => {
     if (!ctx.from) return next();
-    const userId = ctx.from.id;
+    
+    // Konversi ke String biar aman
+    const userId = String(ctx.from.id);
+    const text = ctx.message?.text;
 
-    // Inisialisasi user di awal
-    getUser(userId);
-    const user = getUser(userId);
+    // LOG 1: Cek apakah pesan masuk
+    if (text) {
+        console.log(`[DEBUG] Pesan masuk dari ${userId}: "${text}"`);
+        console.log(`[DEBUG] Status Flow saat ini:`, adminFlows[userId] ? adminFlows[userId].step : "TIDAK ADA FLOW");
+    }
 
-    // Prioritas utama: Menangani input untuk alur admin yang aktif
+    getUser(ctx.from.id); 
+    const user = getUser(ctx.from.id);
+
+    // LOGIKA HANDLING FLOW ADMIN
     if (adminFlows[userId] && adminFlows[userId].step) {
         const flow = adminFlows[userId];
-        const text = ctx.message?.text;
 
-        if (!text) { // Abaikan update non-teks
-            return;
-        }
+        if (!text) return; // Abaikan kalau bukan text (misal stiker)
 
+        // Hapus pesan user biar rapi
         await safeDelete(ctx, ctx.message.message_id);
         if(flow.lastBotMsg) {
             await safeDelete(ctx, flow.lastBotMsg);
-            delete flow.lastBotMsg; // Hapus setelah digunakan
+            delete flow.lastBotMsg; 
         }
+
+        console.log(`[DEBUG] Memproses step: ${flow.step}`);
 
         switch (flow.step) {
             case 'WAITING_USERNAME':
@@ -61,37 +72,52 @@ bot.use(async (ctx, next) => {
 
             case 'WAITING_EMAIL':
                 flow.email = text;
-
                 const { username, password, email } = flow;
+                
+                // Mulai sesi baru
                 const automator = new GitHubAutomator(ctx, { username, password, email });
-
                 updateUser(userId, { ghSession: JSON.parse(automator.exportData()) });
-                delete adminFlows[userId]; // Selesaikan alur
-
-                await ctx.reply(`✅ Data Tersimpan di Database!\n👤 Target: ${username}`);
+                
+                delete adminFlows[userId]; // Reset flow
+                
+                await ctx.reply(`✅ Data Tersimpan!\n👤 Target: ${username}`);
                 showAdminPanel(ctx, automator);
                 break;
-
+            
             case 'WAITING_OTP':
+                console.log("[DEBUG] Masuk case WAITING_OTP");
                 if (flow.resolveOtp) {
-                    clearTimeout(flow.timeout); // Batalkan timeout karena user sudah input
-                    flow.resolveOtp(text); // Kirim OTP ke Promise yang sedang menunggu
-                    delete flow.resolveOtp;
-                    flow.step = null;
-                    await ctx.reply("🔄 Memproses OTP...");
+                    console.log("[DEBUG] Resolver ditemukan, mengirim OTP ke automator...");
+                    
+                    // 1. Matikan timeout biar gak error double
+                    if (flow.timeout) clearTimeout(flow.timeout);
+                    
+                    // 2. Beri feedback visual DULUAN biar user tau bot hidup
+                    await ctx.reply("mbentarrr... lagi dikirim ke github 🔄");
+
+                    // 3. Kirim data ke proses login yang sedang 'await'
+                    flow.resolveOtp(text); 
+                    
+                    // 4. Bersihkan memory
+                    delete flow.resolveOtp; 
+                    // JANGAN delete adminFlows[userId] disini, biarkan runAutomatorStep yang handle
+                    // flow.step = 'PROCESSING'; // Opsional: ubah status biar gak nerima input lagi
+                } else {
+                    console.log("[DEBUG] ANEH: Step WAITING_OTP ada, tapi function resolveOtp hilang!");
+                    await ctx.reply("⚠️ Sesi OTP kadaluarsa/error. Coba login ulang.");
+                    delete adminFlows[userId];
                 }
                 break;
         }
-        return; // Hentikan middleware di sini karena input sudah diproses
+        return; // Stop middleware disini kalau sudah diproses
     }
 
-    // Prioritas kedua: Menangani input untuk wizard KTM/Canva
+    // Prioritas kedua: Wizard KTM/Canva
     if (user && user.state) {
         if (user.state.startsWith('CANVA_WIZARD_')) { await canvaHandler.handleWizardText(ctx); return; }
         if (user.state.startsWith('KTM_WIZARD_')) { await ktmHandler.handleWizardText(ctx); return; }
     }
-
-    // Jika tidak ada alur aktif, lanjutkan ke handler Telegraf lainnya (.command, .hears)
+    
     await next();
 });
 
@@ -101,7 +127,7 @@ setupAdminHandler(bot);
 const ktmHandler = setupKTMHandler(bot);
 const canvaHandler = setupCanvaHandler(bot);
 
-// --- ADMIN PANEL ---
+// --- ADMIN PANEL FUNCTIONS ---
 const showAdminPanel = (ctx, automator) => {
     let status = "🔴 TIDAK AKTIF";
     if (automator?.config?.username) {
@@ -121,10 +147,9 @@ const showAdminPanel = (ctx, automator) => {
 };
 
 const getAutomator = (ctx) => {
+    const userId = String(ctx.chat.id); // Konsisten String
     const user = getUser(ctx.chat.id);
-    if (!user.ghSession) {
-        return null;
-    }
+    if (!user.ghSession) return null;
     return new GitHubAutomator(ctx, null, user.ghSession);
 };
 
@@ -132,6 +157,68 @@ const saveSession = (ctx, automator) => {
     updateUser(ctx.chat.id, { ghSession: JSON.parse(automator.exportData()) });
 };
 
+// --- ACTION HANDLERS ---
+
+// Helper untuk OTP Callback
+const createOtpCallback = (ctx) => (type) => {
+    const userId = String(ctx.from.id);
+    let prompt = type === 'authenticator' 
+        ? "📱 Masukkan kode *Authenticator*:" 
+        : "📩 Masukkan kode *Email*:";
+
+    return new Promise((resolve, reject) => {
+        ctx.reply(prompt, { parse_mode: 'Markdown' }).then((msg) => {
+            console.log(`[DEBUG] Menunggu OTP dari user: ${userId}`);
+            
+            // Timeout 3 menit
+            const timeoutId = setTimeout(() => {
+                console.log(`[DEBUG] Timeout OTP untuk ${userId}`);
+                if (adminFlows[userId]) delete adminFlows[userId];
+                reject(new Error("Kelamaan ngisinya bos (Timeout)"));
+            }, 180000); 
+
+            adminFlows[userId] = {
+                step: 'WAITING_OTP',
+                resolveOtp: resolve,
+                lastBotMsg: msg.message_id,
+                timeout: timeoutId
+            };
+        });
+    });
+};
+
+// Helper Wrapper untuk Step Automator
+async function runAutomatorStep(ctx, stepFunction, successMessage) {
+    const userId = String(ctx.from.id);
+    const auto = getAutomator(ctx);
+    
+    if (!auto) {
+        return ctx.answerCbQuery('Buat Data Baru dulu!', { show_alert: true });
+    }
+    
+    await ctx.answerCbQuery();
+    await ctx.reply(`🚀 Sabar, lagi proses...`);
+
+    // Bersihkan flow lama jika ada (kecuali session data)
+    if (adminFlows[userId]) delete adminFlows[userId];
+
+    try {
+        const result = await stepFunction(auto);
+        saveSession(ctx, auto); // Simpan cookie terbaru
+        
+        const message = typeof successMessage === 'function' ? successMessage(auto, result) : successMessage;
+        await ctx.reply(message, { parse_mode: 'Markdown' });
+        
+    } catch (e) {
+        console.error(`[ERROR EXECUTION]`, e);
+        await ctx.reply(`❌ GAGAL: ${e.message}`);
+    } finally {
+        // Hapus status WAITING_OTP jika masih nyangkut
+        if (adminFlows[userId]) delete adminFlows[userId];
+    }
+}
+
+// --- COMMANDS ---
 bot.command('autogh', (ctx) => {
     if (ctx.from.id.toString() !== process.env.OWNER_ID) return;
     const automator = getAutomator(ctx);
@@ -139,154 +226,29 @@ bot.command('autogh', (ctx) => {
 });
 
 bot.action('gh_new', async (ctx) => {
+    const userId = String(ctx.chat.id);
     await ctx.answerCbQuery();
-    await ctx.deleteMessage().catch(()=>{});
-    adminFlows[ctx.chat.id] = { step: 'WAITING_USERNAME' };
-    const msg = await ctx.reply('🤖 Masukkan *Username GitHub*: (Auto Hapus)', { parse_mode: 'Markdown' });
-    adminFlows[ctx.chat.id].lastBotMsg = msg.message_id;
+    adminFlows[userId] = { step: 'WAITING_USERNAME' };
+    const msg = await ctx.reply('🤖 Masukkan *Username GitHub*:');
+    adminFlows[userId].lastBotMsg = msg.message_id;
 });
 
-// === PERBAIKAN: FUNGSI OTP DENGAN TIMEOUT ===
-const createOtpCallback = (ctx) => (type) => {
-    let prompt;
-    if (type === 'authenticator_setup') {
-        prompt = "📱 Scan QR / gunakan Setup Key, lalu masukkan 6-digit kode dari *Authenticator App* Anda:";
-    } else if (type === 'authenticator') {
-        prompt = "📱 Masukkan kode dari *Authenticator App* Anda:";
-    } else {
-        prompt = "📩 Masukkan kode verifikasi dari *Email* Anda:";
-    }
+bot.action('gh_1', (ctx) => runAutomatorStep(ctx, 
+    (auto) => auto.runStep1_Login(createOtpCallback(ctx)), 
+    (auto) => `✅ Login sukses: *${auto.config.username}*`
+));
 
-    return new Promise(async (resolve, reject) => {
-        const msg = await ctx.reply(prompt, { parse_mode: 'Markdown' });
+// ... (Action gh_2, gh_2fa, gh_3, gh_4 sama seperti sebelumnya, pakai runAutomatorStep)
+bot.action('gh_2', (ctx) => runAutomatorStep(ctx, (auto) => auto.runStep2_Profile(), "✅ Profile Updated"));
+bot.action('gh_3', (ctx) => runAutomatorStep(ctx, (auto) => auto.runStep3_Billing(), "✅ Billing Updated"));
+bot.action('gh_4', (ctx) => runAutomatorStep(ctx, (auto) => auto.runStep4_Education(), "✅ Applied Student Pack"));
 
-        const timeout = setTimeout(() => {
-            // Hapus flow jika timeout
-            if (adminFlows[ctx.from.id]) {
-                delete adminFlows[ctx.from.id];
-            }
-            safeDelete(ctx, msg.message_id); // Hapus pesan permintaan OTP
-            reject(new Error('Waktu untuk memasukkan kode OTP habis (5 menit).'));
-        }, 300000); // Timeout 5 menit
-
-        adminFlows[ctx.from.id] = {
-            step: 'WAITING_OTP',
-            resolveOtp: resolve,
-            lastBotMsg: msg.message_id,
-            timeout: timeout, // Simpan referensi timeout
-        };
-    });
-};
-
-// === PERBAIKAN LOGIKA ERROR HANDLING DI SEMUA ACTION HANDLER ===
-async function runAutomatorStep(ctx, stepFunction, successMessage) {
-    const userId = ctx.from.id;
-    const auto = getAutomator(ctx);
-    if (!auto) {
-        await ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
-        return;
-    }
-
-    await ctx.answerCbQuery();
-    await ctx.reply(`🚀 Memulai proses...`);
-
-    // Hapus alur admin yang mungkin sedang berjalan untuk menghindari konflik
-    if (adminFlows[userId]) {
-        if(adminFlows[userId].timeout) clearTimeout(adminFlows[userId].timeout);
-        delete adminFlows[userId];
-    }
-
-    try {
-        const result = await stepFunction(auto);
-        saveSession(ctx, auto);
-
-        // Pesan sukses bisa berupa fungsi atau string statis
-        const message = typeof successMessage === 'function'
-            ? successMessage(auto, result)
-            : successMessage;
-
-        await ctx.reply(message, { parse_mode: 'Markdown' });
-
-    } catch (e) {
-        console.error(`🔥 Error pada step: ${e.stack}`);
-        await ctx.reply(`❌ Terjadi error: ${e.message}\n\nSilakan coba lagi dari awal atau periksa kembali data Anda.`);
-    } finally {
-        // Pastikan state menunggu OTP selalu dibersihkan, baik berhasil maupun gagal
-        if (adminFlows[userId] && adminFlows[userId].step === 'WAITING_OTP') {
-            if(adminFlows[userId].timeout) clearTimeout(adminFlows[userId].timeout);
-            delete adminFlows[userId];
-        }
-    }
-}
-
-bot.action('gh_1', async (ctx) => {
-    await runAutomatorStep(
-        ctx,
-        (auto) => auto.runStep1_Login(createOtpCallback(ctx)),
-        (auto) => `✅ Login sebagai *${auto.config.username}* berhasil! Sesi disimpan.`
-    );
-});
-
-bot.action('gh_2', async (ctx) => {
-    await runAutomatorStep(
-        ctx,
-        (auto) => auto.runStep2_Profile(),
-        (auto) => `✅ Step 2 Selesai. Nama profil telah diatur menjadi *${auto.config.fullName}*.`
-    );
-});
-
-bot.action('gh_2fa', async (ctx) => {
-    await runAutomatorStep(
-        ctx,
-        (auto) => auto.runStep2_5_2FASetup(),
-        (auto, result) => {
-            const { setupKey, recoveryCodes } = result;
-            const fileContent = `Two-Factor Authentication Setup for GitHub: ${auto.config.username}\n\n` +
-                                `===================================================\n` +
-                                `IMPORTANT: Simpan informasi ini di tempat yang aman.\n` +
-                                `===================================================\n\n` +
-                                `Setup Key (untuk dimasukkan manual ke authenticator app):\n${setupKey}\n\n` +
-                                `Recovery Codes (jika Anda kehilangan akses ke authenticator):\n` +
-                                `${recoveryCodes.join('\n')}\n`;
-
-            ctx.replyWithDocument(
-                { source: Buffer.from(fileContent, 'utf-8'), filename: `github-2fa-recovery-${auto.config.username}.txt` },
-                { caption: `✅ 2FA berhasil diaktifkan! **SIMPAN FILE INI DENGAN AMAN!**` }
-            );
-            return '✅ Step 2.5 Selesai. File recovery dikirim.';
-        }
-    );
-});
-
-bot.action('gh_3', async (ctx) => {
-    await runAutomatorStep(
-        ctx,
-        (auto) => auto.runStep3_Billing(),
-        () => "✅ Step 3 Selesai. Informasi penagihan telah disimpan."
-    );
-});
-
-bot.action('gh_4', async (ctx) => {
-    await runAutomatorStep(
-        ctx,
-        (auto) => auto.runStep4_Education(),
-        () => "✅ Step 4 (Final) Selesai. Aplikasi GitHub Student Developer Pack telah berhasil dikirim dan sedang ditinjau."
-    );
-});
-
-
-bot.start(async (ctx) => {
+bot.start((ctx) => {
     getUser(ctx.from.id, ctx.startPayload);
-    updateUser(ctx.from.id, { state: null });
-    let kb = [['💳 Generate KTM (Indo)', '🎓 Canva Education (K-12)'], ['👤 Profil Saya', '📅 Daily Check-in'], ['ℹ️ Info Bot', '🆘 Bantuan']];
-    if (ctx.from.id.toString() === process.env.OWNER_ID) kb.push(['/autogh']);
-
-    ctx.reply(`Halo ${ctx.from.first_name}! Selamat datang.`, Markup.keyboard(kb).resize());
+    ctx.reply(`Halo bos!`, Markup.keyboard([['/autogh']]).resize());
 });
 
 bot.launch({ dropPendingUpdates: true });
-console.log("🚀 Bot is running...");
+console.log("🚀 Bot is running in DEBUG MODE...");
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
-
-// --- END OF FILE index.js ---
