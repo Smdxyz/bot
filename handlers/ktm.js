@@ -5,51 +5,54 @@ import { drawKTM } from '../lib/painter.js';
 import { generateFullRandom, generateSemiAuto } from '../lib/randomizer.js';
 import { broadcastSuccess } from './admin.js';
 
-// Setup Handler (Tombol)
 export const setupKTMHandler = (bot) => {
     
+    // Menu Utama KTM
     bot.hears('💳 Generate KTM', (ctx) => {
         const basePrice = 3000;
         const finalPrice = calculatePrice(ctx.from.id, basePrice);
         
+        // Reset state jika user sedang di tengah wizard lain
         updateUser(ctx.from.id, { state: null, tempData: {} });
-        
-        ctx.reply(
-            `🇮🇩 *MENU KTM INDONESIA*\n` +
-            `💰 Harga Normal: ~${basePrice}~\n` +
-            `🏷 Harga Kamu: *${finalPrice} Koin*\n\n` +
+
+        ctx.replyWithMarkdown(
+            `🇮🇩 *KTM GENERATOR INDONESIA*\n\n` +
+            `💰 Harga Normal: ~${basePrice}~ Koin\n` +
+            `👑 Harga VIP: *${finalPrice} Koin*\n\n` +
             `Pilih metode pembuatan:`,
             Markup.inlineKeyboard([
                 [Markup.button.callback('🎲 Random Data', 'ktm_mode_random')],
-                [Markup.button.callback('✍️ Isi Manual', 'ktm_mode_manual')]
+                [Markup.button.callback('✍️ Isi Manual (Wizard)', 'ktm_mode_manual')],
+                [Markup.button.callback('❌ Tutup', 'cancel_process')]
             ])
         );
     });
 
-    // MODE RANDOM
+    // Action: Mode Random
     bot.action('ktm_mode_random', async (ctx) => {
-        ctx.answerCbQuery();
+        await ctx.answerCbQuery();
         await ctx.deleteMessage();
         processKTM(ctx, 'random');
     });
 
-    // MODE MANUAL (WIZARD START)
+    // Action: Mode Manual (Mulai Wizard)
     bot.action('ktm_mode_manual', async (ctx) => {
-        ctx.answerCbQuery();
+        await ctx.answerCbQuery();
         await ctx.deleteMessage();
         
         updateUser(ctx.from.id, { state: 'KTM_INPUT_GENDER', tempData: {} });
         
-        ctx.reply('👨‍🎓 *LANGKAH 1/3*\n\nPilih jenis kelamin untuk foto:', 
+        ctx.reply('👨‍🎓 *WIZARD KTM (1/3)*\n\nPilih jenis kelamin untuk foto AI:', 
             Markup.inlineKeyboard([
-                [Markup.button.callback('Laki-laki', 'ktm_gender_pria'), Markup.button.callback('Perempuan', 'ktm_gender_wanita')],
+                [Markup.button.callback('👨 Laki-laki', 'ktm_gen_pria'), Markup.button.callback('👩 Perempuan', 'ktm_gen_wanita')],
                 [Markup.button.callback('❌ Batal', 'cancel_process')]
             ])
         );
     });
 
-    bot.action(/^ktm_gender_(.+)$/, async (ctx) => {
-        ctx.answerCbQuery();
+    // Action: Pilih Gender Manual
+    bot.action(/^ktm_gen_(.+)$/, async (ctx) => {
+        await ctx.answerCbQuery();
         const gender = ctx.match[1];
         const user = getUser(ctx.from.id);
         
@@ -58,11 +61,11 @@ export const setupKTMHandler = (bot) => {
             tempData: { ...user.tempData, gender } 
         });
 
-        await ctx.editMessageText(`✅ Gender: ${gender}\n\n🏫 *LANGKAH 2/3*\nSilakan ketik *NAMA UNIVERSITAS* (Contoh: Universitas Indonesia).`);
+        await ctx.editMessageText(`✅ Gender: *${gender === 'pria' ? 'Laki-laki' : 'Perempuan'}*\n\n🏫 *WIZARD KTM (2/3)*\nKetikkan **NAMA UNIVERSITAS**\n(Contoh: Universitas Gadjah Mada)`, { parse_mode: 'Markdown' });
     });
 };
 
-// Handle Input Teks (Dipanggil dari index.js)
+// Handler Input Teks Manual (Dipanggil oleh index.js)
 export const handleKTMText = async (ctx, user) => {
     const text = ctx.message.text;
 
@@ -71,54 +74,59 @@ export const handleKTMText = async (ctx, user) => {
             state: 'KTM_INPUT_NAME', 
             tempData: { ...user.tempData, univName: text } 
         });
-        await ctx.reply(`✅ Univ: ${text}\n\n👤 *LANGKAH 3/3 (TERAKHIR)*\nSilakan ketik *NAMA LENGKAP* mahasiswa.`);
+        await ctx.reply(`✅ Univ: *${text}*\n\n👤 *WIZARD KTM (3/3)*\nKetikkan **NAMA LENGKAP** mahasiswa:`, { parse_mode: 'Markdown' });
     } 
     else if (user.state === 'KTM_INPUT_NAME') {
         const finalData = { ...user.tempData, fullName: text };
-        updateUser(ctx.from.id, { state: null, tempData: {} }); // Reset State
+        // Reset state agar tidak nyangkut
+        updateUser(ctx.from.id, { state: null, tempData: {} }); 
         await processKTM(ctx, 'manual', finalData);
     }
 };
 
-// Logika Pemrosesan Gambar
+// Fungsi Utama Pemrosesan
 async function processKTM(ctx, mode, inputData = null) {
     const basePrice = 3000;
     const finalPrice = calculatePrice(ctx.from.id, basePrice);
     const user = getUser(ctx.from.id);
 
     if (user.balance < finalPrice) {
-        return ctx.reply(`❌ *Saldo Kurang!*\nButuh: ${finalPrice}\nPunya: ${user.balance}\n\nSilakan topup atau daily absen.`);
+        return ctx.reply(`❌ *Saldo Tidak Cukup!*\n\nBiaya: ${finalPrice} Koin\nSaldo Anda: ${user.balance} Koin\n\nSilakan gunakan daily absen atau hubungi admin.`);
     }
 
-    // Potong Saldo Dulu
-    updateUser(ctx.from.id, { balance: user.balance - finalPrice });
-
-    const msg = await ctx.reply('⏳ *Sedang Memproses...*\n_Menghubungi AI untuk foto & merender kartu..._',{parse_mode:'Markdown'});
+    const loading = await ctx.reply('⏳ *Sedang memproses...*\n_Mohon tunggu sekitar 30-60 detik._', { parse_mode: 'Markdown' });
 
     try {
-        let data = mode === 'random' ? generateFullRandom() : generateSemiAuto(inputData);
+        // Siapkan data (Random atau Manual)
+        let data = (mode === 'random') ? generateFullRandom() : generateSemiAuto(inputData);
         
-        // Generate Foto AI
+        // Step 1: Potong Saldo
+        updateUser(ctx.from.id, { balance: user.balance - finalPrice });
+
+        // Step 2: Generate Foto AI
         ctx.replyWithChatAction('upload_photo');
         const photoUrl = await generatePersonImage(data.gender, 'student');
-        if (!photoUrl) throw new Error("AI gagal generate wajah.");
+        if (!photoUrl) throw new Error("AI Timeout");
         data.photoUrl = photoUrl;
 
-        // Render Canvas
+        // Step 3: Gambar Kartu
         const buffer = await drawKTM(data);
         
-        await ctx.deleteMessage(msg.message_id).catch(()=>{});
+        // Step 4: Kirim Hasil
+        await ctx.deleteMessage(loading.message_id).catch(() => {});
         await ctx.replyWithPhoto({ source: buffer }, {
-            caption: `✅ *KTM BERHASIL DIBUAT*\n\n👤 Nama: ${data.fullName}\n🎓 Kampus: ${data.univName}\n💸 Biaya: ${finalPrice} Koin`,
+            caption: `✅ *KTM BERHASIL DIBUAT*\n\n👤 Nama: ${data.fullName}\n🎓 Univ: ${data.univName}\n💸 Biaya: ${finalPrice} Koin (VIP Disc 50%)`,
             parse_mode: 'Markdown'
         });
 
+        // Broadcast Sukses
         broadcastSuccess(ctx.telegram, "KTM Indonesia", data.fullName, finalPrice);
 
     } catch (e) {
-        console.error(e);
-        updateUser(ctx.from.id, { balance: user.balance + finalPrice }); // Refund
-        await ctx.deleteMessage(msg.message_id).catch(()=>{});
-        ctx.reply("❌ Gagal membuat gambar. Saldo dikembalikan.");
+        console.error("KTM Error:", e);
+        // Refund saldo jika gagal total
+        updateUser(ctx.from.id, { balance: user.balance }); 
+        await ctx.deleteMessage(loading.message_id).catch(() => {});
+        ctx.reply("❌ *Gagal memproses kartu.*\nPastikan server AI sedang online. Saldo telah dikembalikan.");
     }
 }

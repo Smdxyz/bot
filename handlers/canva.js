@@ -8,32 +8,45 @@ import { broadcastSuccess } from './admin.js';
 
 export const setupCanvaHandler = (bot) => {
     
+    // Menu Utama Canva
     bot.hears('🎓 Canva Education', (ctx) => {
-        updateUser(ctx.from.id, { state: null });
-        ctx.reply('🌍 Pilih Negara Dokumen:', Markup.inlineKeyboard([
-            [Markup.button.callback('🇪🇸 Spain', 'cnv_ctry_spain'), Markup.button.callback('🇬🇧 UK', 'cnv_ctry_uk')],
-            [Markup.button.callback('🇦🇺 Australia', 'cnv_ctry_australia'), Markup.button.callback('🇨🇦 Canada', 'cnv_ctry_canada')]
-        ]));
+        updateUser(ctx.from.id, { state: null, tempData: {} });
+        
+        ctx.reply('🌍 *PILIH NEGARA DOKUMEN*\n\nPaket ini berisi ID Card, Sertifikat Mengajar, dan Kontrak Kerja.', {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('🇪🇸 Spain', 'cnv_ctry_spain'), Markup.button.callback('🇬🇧 UK', 'cnv_ctry_uk')],
+                [Markup.button.callback('🇦🇺 Australia', 'cnv_ctry_australia'), Markup.button.callback('🇨🇦 Canada', 'cnv_ctry_canada')],
+                [Markup.button.callback('❌ Batal', 'cancel_process')]
+            ])
+        });
     });
 
-    bot.action(/^cnv_ctry_(.+)$/, (ctx) => {
+    // Action: Pilih Negara
+    bot.action(/^cnv_ctry_(.+)$/, async (ctx) => {
+        await ctx.answerCbQuery();
         const country = ctx.match[1];
         const basePrice = 3000;
         const finalPrice = calculatePrice(ctx.from.id, basePrice);
 
-        ctx.deleteMessage();
-        ctx.reply(`🎓 *PAKET GURU ${country.toUpperCase()}*\n💰 Harga: *${finalPrice} Koin*\n\nMetode?`, 
-            Markup.inlineKeyboard([
-                [Markup.button.callback('🎲 Random', `cnv_go_rand_${country}`)],
-                [Markup.button.callback('✍️ Manual', `cnv_go_man_${country}`)]
-            ])
+        await ctx.editMessageText(
+            `🏛 *NEGARA: ${country.toUpperCase()}*\n` +
+            `💰 Biaya Paket: *${finalPrice} Koin*\n\n` +
+            `Pilih metode pembuatan:`,
+            {
+                parse_mode: 'Markdown',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('🎲 Full Random', `cnv_go_rand_${country}`)],
+                    [Markup.button.callback('✍️ Manual (Wizard)', `cnv_go_man_${country}`)]
+                ])
+            }
         );
     });
 
-    // AUTO / RANDOM
+    // Action: Mode Random
     bot.action(/^cnv_go_rand_(.+)$/, async (ctx) => {
-        ctx.answerCbQuery();
-        ctx.deleteMessage();
+        await ctx.answerCbQuery();
+        await ctx.deleteMessage();
         const country = ctx.match[1];
         
         const cData = getCountryData(country);
@@ -46,39 +59,39 @@ export const setupCanvaHandler = (bot) => {
             position: cData.positions[0],
             idNum: randPerson.idNum,
             birthDate: randPerson.dob,
-            gender: randPerson.gender,
-            address: "School St. 123"
+            gender: randPerson.gender
         };
         
         processCanva(ctx, data, country);
     });
 
-    // MANUAL SETUP
-    bot.action(/^cnv_go_man_(.+)$/, (ctx) => {
+    // Action: Mode Manual (Wizard Start)
+    bot.action(/^cnv_go_man_(.+)$/, async (ctx) => {
+        await ctx.answerCbQuery();
         const country = ctx.match[1];
+        
         updateUser(ctx.from.id, { 
             state: 'CNV_INPUT_NAME', 
             tempData: { countryKey: country } 
         });
-        ctx.deleteMessage();
-        ctx.reply(`✍️ *INPUT MANUAL (${country.toUpperCase()})*\n\nLangkah 1: Masukkan *Nama Lengkap*.`);
+        
+        await ctx.editMessageText(`✍️ *CANVA WIZARD (1/3)*\n\nMasukkan **NAMA LENGKAP** (Gunakan nama asli agar verifikasi lancar):`, { parse_mode: 'Markdown' });
     });
     
-    // ACTION GENDER MANUAL
+    // Action: Pilihan Gender Manual
     bot.action(/^cnv_man_gen_(.+)$/, async (ctx) => {
+        await ctx.answerCbQuery();
         const gender = ctx.match[1] === 'male' ? 'pria' : 'wanita';
         const user = getUser(ctx.from.id);
         const temp = user.tempData;
-        const cData = getCountryData(temp.countryKey);
 
         const finalData = {
             ...temp,
             gender: gender,
-            city: temp.schoolName, // Simplifikasi
-            address: "School District",
-            position: cData.positions[0],
-            idNum: "998877",
-            birthDate: "12/05/1990"
+            city: temp.schoolName, 
+            position: "Senior Teacher",
+            idNum: Math.floor(100000 + Math.random() * 900000).toString(),
+            birthDate: "15/08/1988"
         };
 
         updateUser(ctx.from.id, { state: null });
@@ -87,7 +100,7 @@ export const setupCanvaHandler = (bot) => {
     });
 };
 
-// TEXT HANDLER CANVA
+// Handler Input Teks Canva
 export const handleCanvaText = async (ctx, user) => {
     const text = ctx.message.text;
 
@@ -96,46 +109,57 @@ export const handleCanvaText = async (ctx, user) => {
             state: 'CNV_INPUT_SCHOOL',
             tempData: { ...user.tempData, fullName: text }
         });
-        ctx.reply(`✅ Nama: ${text}\n\nLangkah 2: Masukkan *Nama Sekolah*.`);
+        await ctx.reply(`✅ Nama: *${text}*\n\n🏫 *CANVA WIZARD (2/3)*\nMasukkan **NAMA SEKOLAH/INSTITUSI**:`, { parse_mode: 'Markdown' });
     }
     else if (user.state === 'CNV_INPUT_SCHOOL') {
         updateUser(ctx.from.id, {
             state: 'CNV_WAIT_GENDER',
             tempData: { ...user.tempData, schoolName: text }
         });
-        ctx.reply(`✅ Sekolah: ${text}\n\nLangkah 3: Pilih Gender Foto.`, Markup.inlineKeyboard([
-            [Markup.button.callback('👨 Pria', 'cnv_man_gen_male'), Markup.button.callback('👩 Wanita', 'cnv_man_gen_female')]
-        ]));
+        await ctx.reply(`✅ Sekolah: *${text}*\n\n⚧ *CANVA WIZARD (3/3)*\nPilih gender untuk foto AI:`, 
+            Markup.inlineKeyboard([
+                [Markup.button.callback('👨 Pria', 'cnv_man_gen_male'), Markup.button.callback('👩 Wanita', 'cnv_man_gen_female')]
+            ])
+        );
     }
 };
 
-// PROCESSOR
+// Fungsi Utama Pemrosesan
 async function processCanva(ctx, data, countryKey) {
     const basePrice = 3000;
     const finalPrice = calculatePrice(ctx.from.id, basePrice);
     const user = getUser(ctx.from.id);
 
-    if (user.balance < finalPrice) return ctx.reply('❌ Saldo tidak cukup.');
-    updateUser(ctx.from.id, { balance: user.balance - finalPrice });
+    if (user.balance < finalPrice) return ctx.reply('❌ Saldo Anda tidak cukup.');
 
-    const msg = await ctx.reply('⏳ Generating 3 Dokumen (ID, Cert, Contract)...');
+    const loading = await ctx.reply(`⏳ *Sedang Menyiapkan Paket Dokumen...*\nNegara: ${countryKey.toUpperCase()}\nBiaya: ${finalPrice} Koin`, { parse_mode: 'Markdown' });
 
     try {
+        // Step 1: Potong Saldo
+        updateUser(ctx.from.id, { balance: user.balance - finalPrice });
+
+        // Step 2: Generate Foto AI
         data.photoUrl = await generatePersonImage(data.gender, 'teacher');
-        
+        if(!data.photoUrl) throw new Error("AI Error");
+
+        // Step 3: Render 3 Dokumen
         const doc1 = await drawCanvaID(data, countryKey);
-        await ctx.replyWithPhoto({ source: doc1 }, { caption: '📄 ID Card' });
-
         const doc2 = await drawCanvaCert(data, countryKey);
-        await ctx.replyWithDocument({ source: doc2, filename: 'Certificate.png' });
-
         const doc3 = await drawCanvaContract(data, countryKey);
-        await ctx.replyWithDocument({ source: doc3, filename: 'Contract.png' }, { caption: '✅ Selesai!' });
 
-        broadcastSuccess(ctx.telegram, `Canva ${countryKey}`, data.fullName, finalPrice);
+        // Step 4: Kirim Hasil
+        await ctx.deleteMessage(loading.message_id).catch(() => {});
+        
+        await ctx.replyWithPhoto({ source: doc1 }, { caption: `📄 *1. IDENTITY CARD*\nStatus: Verified`, parse_mode: 'Markdown' });
+        await ctx.replyWithDocument({ source: doc2, filename: 'Certificate.png' }, { caption: `📄 *2. TEACHING CERTIFICATE*`, parse_mode: 'Markdown' });
+        await ctx.replyWithDocument({ source: doc3, filename: 'Contract.png' }, { caption: `📄 *3. EMPLOYMENT CONTRACT*\n\n✅ Selesai! Gunakan dokumen ini untuk mendaftar Canva Education.`, parse_mode: 'Markdown' });
+
+        broadcastSuccess(ctx.telegram, `Canva Edu ${countryKey}`, data.fullName, finalPrice);
+
     } catch (e) {
-        console.error(e);
-        updateUser(ctx.from.id, { balance: user.balance + finalPrice });
-        ctx.reply('❌ Error system.');
+        console.error("Canva Error:", e);
+        updateUser(ctx.from.id, { balance: user.balance });
+        await ctx.deleteMessage(loading.message_id).catch(() => {});
+        ctx.reply('❌ Terjadi kesalahan saat generate dokumen. Saldo telah dikembalikan.');
     }
 }

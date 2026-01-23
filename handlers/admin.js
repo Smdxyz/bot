@@ -1,87 +1,105 @@
-import { getUser, updateUser, addCode, updateCode, getCode } from '../lib/db.js';
+import { Markup } from 'telegraf';
+import { getUser, updateUser, addCode } from '../lib/db.js';
 
 const ADMIN_ID = parseInt(process.env.OWNER_ID);
-const CHANNEL_ID = process.env.CHANNEL_ID;
-
-export const broadcastSuccess = async (telegram, type, name, price) => {
-    if(!CHANNEL_ID) return;
-    try {
-        await telegram.sendMessage(CHANNEL_ID, 
-            `🎉 *TRANSAKSI SUKSES*\n` +
-            `📂 Fitur: ${type}\n` +
-            `👤 User: ${name.substring(0,3)}***\n` +
-            `💸 Omzet: ${price} Koin`, 
-            { parse_mode: 'Markdown' }
-        );
-    } catch(e) {}
-};
 
 export const setupAdminHandler = (bot) => {
-    // Middleware Cek Admin
+    
     const isAdmin = (ctx, next) => {
         if (ctx.from && ctx.from.id === ADMIN_ID) return next();
     };
 
-    // 1. TAMBAH KOIN MANUAL
-    bot.command('addcoin', isAdmin, (ctx) => {
-        const [_, targetId, amount] = ctx.message.text.split(' ');
-        if (!targetId || !amount) return ctx.reply('/addcoin ID JUMLAH');
-        
-        const user = getUser(targetId);
-        if(!user) return ctx.reply('User not found.');
-
-        updateUser(targetId, { balance: user.balance + parseInt(amount) });
-        ctx.reply(`✅ Added ${amount} coins to ${targetId}`);
-        bot.telegram.sendMessage(targetId, `🎁 Admin menambahkan ${amount} Koin ke akunmu!`);
+    bot.hears('🛠 Admin Panel', isAdmin, (ctx) => {
+        ctx.reply('👨‍✈️ *ADMIN DASHBOARD*\n\nKelola user dan sistem di sini:', {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('💰 Tambah Koin', 'adm_add_coin'), Markup.button.callback('👑 Set VIP', 'adm_set_vip')],
+                [Markup.button.callback('🎟 Buat Kode Redeem', 'adm_new_code')],
+                [Markup.button.callback('❌ Tutup', 'cancel_process')]
+            ])
+        });
     });
 
-    // 2. SET VIP MANUAL
-    bot.command('addvip', isAdmin, (ctx) => {
-        const [_, targetId, days] = ctx.message.text.split(' ');
-        if (!targetId || !days) return ctx.reply('/addvip ID HARI');
-        
-        const exp = Date.now() + (parseInt(days) * 24 * 60 * 60 * 1000);
-        updateUser(targetId, { vip: 1, vip_exp: exp });
-        ctx.reply(`✅ ${targetId} is now VIP for ${days} days.`);
-        bot.telegram.sendMessage(targetId, `👑 Selamat! Akunmu jadi VIP selama ${days} hari. Diskon 50% aktif!`);
+    bot.action('adm_add_coin', isAdmin, (ctx) => {
+        updateUser(ADMIN_ID, { state: 'ADM_WAIT_ID_COIN' });
+        ctx.editMessageText('📥 *TAMBAH KOIN*\nMasukkan **ID USER** target (Hanya Angka):', { parse_mode: 'Markdown' });
     });
 
-    // 3. BUAT KODE REDEEM
-    bot.command('newcode', isAdmin, (ctx) => {
-        const [_, code, val, limit] = ctx.message.text.split(' ');
-        if (!limit) return ctx.reply('/newcode KODE NILAI LIMIT');
-        
-        addCode(code.toUpperCase(), parseInt(val), parseInt(limit));
-        ctx.reply(`✅ Code ${code} created.`);
-        
-        if(CHANNEL_ID) {
-            bot.telegram.sendMessage(CHANNEL_ID, 
-                `🎟 *KODE REDEEM BARU*\n\n` +
-                `Kode: \`${code.toUpperCase()}\`\n` +
-                `Nilai: ${val} Koin\n` +
-                `Limit: ${limit} Orang\n\n` +
-                `_Ketik /redeem ${code.toUpperCase()} di bot sekarang!_`,
-                { parse_mode: 'Markdown' }
-            );
+    bot.action('adm_set_vip', isAdmin, (ctx) => {
+        updateUser(ADMIN_ID, { state: 'ADM_WAIT_ID_VIP' });
+        ctx.editMessageText('👑 *SET VIP*\nMasukkan **ID USER** target (Hanya Angka):', { parse_mode: 'Markdown' });
+    });
+
+    bot.action('adm_new_code', isAdmin, (ctx) => {
+        updateUser(ADMIN_ID, { state: 'ADM_WAIT_CODE_DATA' });
+        ctx.editMessageText('🎟 *KODE REDEEM*\nFormat: `KODE|NILAI|LIMIT` (Contoh: `NEWYEAR|5000|20`)');
+    });
+};
+
+// HANDLER INPUT TEKS ADMIN
+export const handleAdminText = async (ctx, user) => {
+    const text = ctx.message.text;
+
+    // VALIDASI KOIN
+    if (user.state === 'ADM_WAIT_ID_COIN') {
+        const targetId = parseInt(text);
+        if (isNaN(targetId)) {
+            updateUser(ctx.from.id, { state: null });
+            return ctx.reply('❌ BATAL: Anda memasukkan teks/file, bukan ID angka!');
         }
-    });
+        updateUser(ctx.from.id, { state: 'ADM_WAIT_AMT_COIN', tempData: { targetId } });
+        return ctx.reply(`Target: \`${targetId}\`\nMasukkan jumlah koin:`);
+    }
 
-    // 4. USER REDEEM
-    bot.command('redeem', (ctx) => {
-        const code = ctx.message.text.split(' ')[1];
-        if(!code) return ctx.reply('⚠️ Format: /redeem KODE');
+    if (user.state === 'ADM_WAIT_AMT_COIN') {
+        const amount = parseInt(text);
+        if (isNaN(amount)) {
+            updateUser(ctx.from.id, { state: null });
+            return ctx.reply('❌ BATAL: Jumlah koin harus angka!');
+        }
+        const target = getUser(user.tempData.targetId);
+        if (!target) return ctx.reply('❌ User tidak ada di database.');
         
-        const data = getCode(code.toUpperCase());
-        if (!data) return ctx.reply('❌ Kode salah.');
-        if (data.used_count >= data.limit_total) return ctx.reply('❌ Kode habis.');
-        if (data.claimed_by.includes(ctx.from.id)) return ctx.reply('⚠️ Sudah pernah redeem.');
+        updateUser(user.tempData.targetId, { balance: target.balance + amount });
+        updateUser(ctx.from.id, { state: null });
+        ctx.reply(`✅ Berhasil! ${amount} koin dikirim ke ${user.tempData.targetId}`);
+        ctx.telegram.sendMessage(user.tempData.targetId, `🎁 Admin memberi Anda ${amount} koin!`);
+    }
 
-        const user = getUser(ctx.from.id);
-        const newClaimers = [...data.claimed_by, ctx.from.id];
-        
-        updateCode(code.toUpperCase(), { used_count: data.used_count + 1, claimed_by: newClaimers });
-        updateUser(ctx.from.id, { balance: user.balance + data.value });
-        
-        ctx.reply(`🎉 Sukses! +${data.value} Koin.`);
-    });
+    // VALIDASI VIP
+    if (user.state === 'ADM_WAIT_ID_VIP') {
+        const targetId = parseInt(text);
+        if (isNaN(targetId)) {
+            updateUser(ctx.from.id, { state: null });
+            return ctx.reply('❌ BATAL: ID harus angka!');
+        }
+        updateUser(ctx.from.id, { state: 'ADM_WAIT_DAY_VIP', tempData: { targetId } });
+        return ctx.reply(`ID: \`${targetId}\`\nBerapa hari VIP?`);
+    }
+
+    if (user.state === 'ADM_WAIT_DAY_VIP') {
+        const days = parseInt(text);
+        if (isNaN(days)) return ctx.reply('❌ Harus angka!');
+        const exp = Date.now() + (days * 24 * 60 * 60 * 1000);
+        updateUser(user.tempData.targetId, { vip: 1, vip_exp: exp });
+        updateUser(ctx.from.id, { state: null });
+        ctx.reply(`✅ ID ${user.tempData.targetId} aktif VIP ${days} hari.`);
+    }
+
+    // VALIDASI KODE
+    if (user.state === 'ADM_WAIT_CODE_DATA') {
+        const p = text.split('|');
+        if (p.length < 3) return ctx.reply('Format salah! KODE|NILAI|LIMIT');
+        addCode(p[0].toUpperCase(), parseInt(p[1]), parseInt(p[2]));
+        updateUser(ctx.from.id, { state: null });
+        ctx.reply(`✅ Kode ${p[0].toUpperCase()} aktif!`);
+    }
+};
+
+export const broadcastSuccess = async (telegram, type, name, price) => {
+    const CH = process.env.CHANNEL_ID;
+    if(!CH) return;
+    try {
+        await telegram.sendMessage(CH, `🎉 *TRANSAKSI BERHASIL*\nFitur: ${type}\nUser: ${name.substring(0,3)}***\nBiaya: ${price} Koin`, { parse_mode: 'Markdown' });
+    } catch(e) {}
 };

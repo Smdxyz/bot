@@ -1,58 +1,41 @@
 import 'dotenv/config';
 import { Telegraf } from 'telegraf';
 import { getUser } from './lib/db.js';
-
-// Load Handlers
 import { setupMenuHandler } from './handlers/menu.js';
-import { setupAdminHandler } from './handlers/admin.js';
+import { setupAdminHandler, handleAdminText } from './handlers/admin.js';
 import { setupKTMHandler, handleKTMText } from './handlers/ktm.js';
 import { setupCanvaHandler, handleCanvaText } from './handlers/canva.js';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// GLOBAL CANCEL ACTION
+// GLOBAL CANCEL
 bot.action('cancel_process', async (ctx) => {
-    ctx.answerCbQuery('Dibatalkan');
+    ctx.answerCbQuery();
     await ctx.deleteMessage();
+    getUser(ctx.from.id) && updateUser(ctx.from.id, { state: null, tempData: {} });
     ctx.reply('❌ Proses dibatalkan.');
 });
 
-// ROUTER TEXT INPUT (Middleware)
-// Ini berfungsi membelokkan pesan teks ke handler yang sesuai berdasarkan state user
+// ROUTER TEKS
 bot.on('text', async (ctx, next) => {
-    // Abaikan command
     if (ctx.message.text.startsWith('/')) return next();
-
-    const user = getUser(ctx.from.id);
     
-    // Cek State KTM
-    if (user.state && user.state.startsWith('KTM_')) {
-        return handleKTMText(ctx, user);
-    }
+    const user = getUser(ctx.from.id);
+    if (!user) return;
 
-    // Cek State Canva
-    if (user.state && user.state.startsWith('CNV_')) {
-        return handleCanvaText(ctx, user);
-    }
+    // Arahkan sesuai state
+    if (user.state?.startsWith('ADM_')) return handleAdminText(ctx, user);
+    if (user.state?.startsWith('KTM_')) return handleKTMText(ctx, user);
+    if (user.state?.startsWith('CNV_')) return handleCanvaText(ctx, user);
 
     next();
 });
 
-// SETUP SEMUA MODULE
+// INISIALISASI MODULE
 setupMenuHandler(bot);
 setupAdminHandler(bot);
 setupKTMHandler(bot);
 setupCanvaHandler(bot);
 
-// ERROR HANDLING
-bot.catch((err, ctx) => {
-    console.error(`Ooops, encountered an error for ${ctx.updateType}`, err);
-    ctx.reply("⚠️ Terjadi kesalahan pada sistem.");
-});
-
 bot.launch();
-console.log('🚀 Bot Tools Indonesia is Running...');
-
-// Graceful Stop
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+console.log('🚀 Bot Aktif (Modular & Anti-Error Mode)');
