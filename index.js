@@ -4,8 +4,6 @@ import 'dotenv/config';
 import { Telegraf, Markup, session } from 'telegraf';
 import { getUser, updateUser } from './lib/db.js';
 import axios from 'axios';
-
-// Import Automator
 import { GitHubAutomator } from './github_automator.js';
 
 // Import Handlers
@@ -14,72 +12,102 @@ import { setupAdminHandler } from './handlers/admin.js';
 import { setupKTMHandler } from './handlers/ktm.js';
 import { setupCanvaHandler } from './handlers/canva.js';
 
-const bot = new Telegraf(process.env.BOT_TOKEN, { handlerTimeout: Infinity });
+// Setup Bot
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// --- STATE MANAGEMENT ANTI-MACET ---
-// Kita simpan "Janji" (Promise) yang sedang menunggu jawaban di sini
-const pendingPrompts = {}; 
-const activeSessions = {}; 
+// --- TAMENG ANTI-MODAR (Global Error Handler) ---
+// Ini mencegah bot mati sendiri kalau ada error tak terduga
+process.on('uncaughtException', (err) => {
+    console.error('🔥 CRITICAL ERROR (Uncaught):', err);
+    // Jangan exit! Biarkan bot tetap hidup.
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('🔥 CRITICAL ERROR (Unhandled Rejection):', reason);
+    // Jangan exit!
+});
 
-// --- FUNGSI HELPER ---
-const safeDelete = async (chatId, msgId) => { try { await bot.telegram.deleteMessage(chatId, msgId); } catch (e) {} };
+// --- GLOBAL VARIABLES ---
+const adminSessions = {}; // Menyimpan data input sementara (Username, Pass, Email)
+const activeAutomators = {}; // Menyimpan objek GitHubAutomator yang sudah jadi
 
-// Fungsi Tanya Jawab (Revolusi: Tanpa Event Emitter)
-const askUser = (chatId, question, isPassword = false) => {
-    return new Promise(async (resolve) => {
-        // 1. Kirim Pertanyaan
-        let qMsg;
-        try {
-            qMsg = await bot.telegram.sendMessage(chatId, question, { parse_mode: 'Markdown' });
-        } catch (e) {
-            console.error("Gagal kirim prompt:", e);
-            resolve(null);
-            return;
-        }
-
-        // 2. Simpan "Kunci" jawaban di memori global
-        // Nanti middleware akan mencari kunci ini untuk membuka gembok promise
-        pendingPrompts[chatId] = {
-            resolve: async (answer, msgId) => {
-                // Bersih-bersih pesan
-                await safeDelete(chatId, msgId); // Hapus jawaban user
-                if (isPassword) await safeDelete(chatId, qMsg.message_id); // Hapus pertanyaan (kalo password)
-                resolve(answer);
-            },
-            timestamp: Date.now()
-        };
-    });
+// Helper Hapus Pesan Aman
+const safeDelete = async (ctx, msgId) => {
+    try { await ctx.deleteMessage(msgId); } catch (e) {}
 };
 
-// --- MIDDLEWARE UTAMA (ROUTER) ---
+// --- MIDDLEWARE ---
 bot.use(session());
 
 bot.use(async (ctx, next) => {
-    // Init User DB
+    // 1. Init User Database
     if (ctx.from) {
-        try { getUser(ctx.from.id); } catch(e) {}
+        try { getUser(ctx.from.id); } catch (e) {}
     }
 
-    // Handle Pesan Teks
+    // 2. Handle Text Input (Logika Utama Tanpa Promise Ribet)
     if (ctx.message && ctx.message.text) {
-        const userId = ctx.from.id;
         const text = ctx.message.text;
+        const userId = ctx.from.id;
+        const user = getUser(userId);
 
-        // 1. CEK APAKAH USER SEDANG DITANYA? (PRIORITAS TERTINGGI)
-        if (pendingPrompts[userId] && !text.startsWith('/')) {
-            const prompt = pendingPrompts[userId];
-            delete pendingPrompts[userId]; // Hapus status nunggu
+        // --- A. JALUR ADMIN (INPUT DATA GITHUB) ---
+        // Kita cek apakah admin sedang dalam proses input data?
+        if (adminSessions[userId] && adminSessions[userId].step) {
+            const step = adminSessions[userId].step;
             
-            // Panggil fungsi resolve yang kita simpan tadi
-            await prompt.resolve(text, ctx.message.message_id);
-            return; // STOP! Jangan diproses handler lain
+            // Hapus pesan user biar rapi/aman
+            await safeDelete(ctx, ctx.message.message_id);
+
+            if (step === 'WAITING_USERNAME') {
+                adminSessions[userId].username = text;
+                adminSessions[userId].step = 'WAITING_PASSWORD';
+                const msg = await ctx.reply('🔑 Masukkan *Password GitHub*: (Pesan ini akan dihapus otomatis)', { parse_mode: 'Markdown' });
+                adminSessions[userId].lastBotMsg = msg.message_id;
+            } 
+            else if (step === 'WAITING_PASSWORD') {
+                adminSessions[userId].password = text;
+                adminSessions[userId].step = 'WAITING_EMAIL';
+                // Hapus pertanyaan password sebelumnya
+                if(adminSessions[userId].lastBotMsg) await safeDelete(ctx, adminSessions[userId].lastBotMsg);
+                await ctx.reply('📧 Masukkan *Email Student*:');
+            } 
+            else if (step === 'WAITING_EMAIL') {
+                adminSessions[userId].email = text;
+                adminSessions[userId].step = null; // Selesai input
+                
+                // Inisialisasi Automator
+                const { username, password, email } = adminSessions[userId];
+                activeAutomators[userId] = new GitHubAutomator(ctx, username, password, email);
+                
+                await ctx.reply(`✅ Data Tersimpan!\n👤 Target: ${username}\n📧 Email: ${email}\n\nSilakan gunakan panel di bawah:`);
+                showAdminPanel(ctx);
+            }
+            else if (step === 'WAITING_OTP') {
+                 // Kalau lagi nunggu OTP (dari request Automator)
+                 if (activeAutomators[userId]) {
+                     activeAutomators[userId].resolveOtp(text); // Kirim OTP ke automator
+                     adminSessions[userId].step = null;
+                     await ctx.reply("🔄 Memproses OTP...");
+                 }
+            }
+
+            return; // Stop, jangan proses handler lain
         }
-        
-        // 2. CEK FILE UPLOAD (IMPORT SESSION)
-        // (Kode import session ada di bawah khusus document, ini hanya fallback text)
+
+        // --- B. JALUR WIZARD USER BIASA (KTM/CANVA) ---
+        if (user && user.state) {
+            if (user.state.startsWith('CANVA_WIZARD_')) {
+                await canvaHandler.handleWizardText(ctx);
+                return;
+            }
+            if (user.state.startsWith('KTM_WIZARD_')) {
+                await ktmHandler.handleWizardText(ctx);
+                return;
+            }
+        }
     }
-    
-    // Handle Document (Import JSON)
+
+    // 3. Handle File Upload (Import Session JSON)
     if (ctx.message && ctx.message.document && ctx.from.id.toString() === process.env.OWNER_ID) {
         const doc = ctx.message.document;
         if (doc.file_name && doc.file_name.endsWith('.json') && doc.file_name.startsWith('GH_SESSION')) {
@@ -89,8 +117,7 @@ bot.use(async (ctx, next) => {
                 const sessionData = response.data;
                 
                 // Restore Sesi
-                const automator = new GitHubAutomator(ctx, null, null, null, sessionData, askUser);
-                activeSessions[ctx.from.id] = automator;
+                activeAutomators[ctx.from.id] = new GitHubAutomator(ctx, null, null, null, sessionData);
                 
                 ctx.reply(`✅ Sesi dipulihkan: *${sessionData.profile.fullName}*\nLanjut ke menu /autogh`, { parse_mode: 'Markdown' });
                 return;
@@ -101,41 +128,23 @@ bot.use(async (ctx, next) => {
         }
     }
 
-    // 3. WIZARD HANDLER (KTM/CANVA)
-    if (ctx.message && ctx.message.text) {
-        const user = getUser(ctx.from.id);
-        if (user && user.state) {
-            if (user.state.startsWith('CANVA_WIZARD_')) {
-                canvaHandler.handleWizardText(ctx).catch(()=>{});
-                return;
-            }
-            if (user.state.startsWith('KTM_WIZARD_')) {
-                ktmHandler.handleWizardText(ctx).catch(()=>{});
-                return;
-            }
-        }
-    }
-
-    await next(); 
+    await next();
 });
 
-// --- LOAD MODUL ---
-setupMenuHandler(bot);  
-setupAdminHandler(bot); 
-const ktmHandler = setupKTMHandler(bot); 
-const canvaHandler = setupCanvaHandler(bot); 
+// --- LOAD HANDLERS ---
+setupMenuHandler(bot);
+setupAdminHandler(bot);
+const ktmHandler = setupKTMHandler(bot);
+const canvaHandler = setupCanvaHandler(bot);
 
 // ==========================================================
-// --- MENU ADMIN (/autogh) ---
+// --- FITUR ADMIN ---
 // ==========================================================
-bot.command('autogh', (ctx) => {
-    if (ctx.from.id.toString() !== process.env.OWNER_ID) return;
-    
-    const session = activeSessions[ctx.from.id];
+
+const showAdminPanel = (ctx) => {
+    const session = activeAutomators[ctx.chat.id];
     let status = "🔴 TIDAK AKTIF";
-    if (session) {
-        status = `🟢 AKTIF (${session.profile.fullName.split(' ')[0]})`;
-    }
+    if (session) status = `🟢 AKTIF (${session.username})`;
 
     ctx.reply(
         `🛠 *GITHUB AUTOMATION PANEL*\nStatus: ${status}\n\n👇 *PILIH TAHAPAN:*`,
@@ -143,73 +152,58 @@ bot.command('autogh', (ctx) => {
             [Markup.button.callback('🆕 Input Data Baru', 'gh_new')],
             [Markup.button.callback('1️⃣ Login', 'gh_1'), Markup.button.callback('2️⃣ Profile', 'gh_2')],
             [Markup.button.callback('3️⃣ Billing', 'gh_3'), Markup.button.callback('4️⃣ Apply Edu', 'gh_4')],
-            [Markup.button.callback('💾 Simpan Sesi (JSON)', 'gh_save')]
+            [Markup.button.callback('💾 Simpan Sesi', 'gh_save')]
         ])
     );
+};
+
+// Command Pemicu
+bot.command('autogh', (ctx) => {
+    if (ctx.from.id.toString() !== process.env.OWNER_ID) return;
+    showAdminPanel(ctx);
 });
 
-// --- ACTIONS ---
+// Actions
+bot.action('gh_new', async (ctx) => {
+    ctx.answerCbQuery();
+    await ctx.deleteMessage();
+    
+    // Mulai State Machine Manual
+    adminSessions[ctx.chat.id] = { step: 'WAITING_USERNAME' };
+    ctx.reply('🤖 Masukkan *Username GitHub*:');
+});
 
-// Helper Cek Sesi
+// Helper cek sesi
 const requireSession = (ctx) => {
-    if (!activeSessions[ctx.chat.id]) {
+    if (!activeAutomators[ctx.chat.id]) {
         ctx.reply("⚠️ Belum ada data. Klik '🆕 Input Data Baru' dulu.");
         return false;
     }
     return true;
 };
 
-bot.action('gh_new', async (ctx) => {
-    ctx.answerCbQuery();
-    await ctx.deleteMessage(); // Bersihkan menu biar rapi
-
-    // Tanya data berurutan
-    const username = await askUser(ctx.chat.id, '🤖 Masukkan *Username GitHub*:');
-    if(!username) return ctx.reply("Batal.");
-
-    const password = await askUser(ctx.chat.id, '🔑 Masukkan *Password GitHub*: (Auto Hapus)', true);
-    if(!password) return ctx.reply("Batal.");
-
-    const email = await askUser(ctx.chat.id, '📧 Masukkan *Email Student*:');
-    if(!email) return ctx.reply("Batal.");
-
-    // Simpan ke memori
-    activeSessions[ctx.chat.id] = new GitHubAutomator(ctx, username, password, email, null, askUser);
-    
-    ctx.reply(`✅ Data tersimpan!\nTarget: ${username}\nSekarang klik tombol *1️⃣ Login* di menu /autogh`);
-});
-
+// Step Actions
 bot.action('gh_1', async (ctx) => {
     if(!requireSession(ctx)) return;
     ctx.answerCbQuery();
-    await activeSessions[ctx.chat.id].step1_Login();
+    // Di sini kita kasih callback buat minta OTP jika butuh
+    activeAutomators[ctx.chat.id].setOtpCallback(() => {
+        adminSessions[ctx.chat.id] = { step: 'WAITING_OTP' }; // Set state nunggu OTP
+        return ctx.reply("📩 Masukkan *OTP Email* GitHub sekarang:");
+    });
+    await activeAutomators[ctx.chat.id].step1_Login();
 });
 
-bot.action('gh_2', async (ctx) => {
-    if(!requireSession(ctx)) return;
-    ctx.answerCbQuery();
-    await activeSessions[ctx.chat.id].step2_SetName();
-});
-
-bot.action('gh_3', async (ctx) => {
-    if(!requireSession(ctx)) return;
-    ctx.answerCbQuery();
-    await activeSessions[ctx.chat.id].step3_SetBilling();
-});
-
-bot.action('gh_4', async (ctx) => {
-    if(!requireSession(ctx)) return;
-    ctx.answerCbQuery();
-    await activeSessions[ctx.chat.id].step4_ApplyEdu();
-});
+bot.action('gh_2', async (ctx) => { if(requireSession(ctx)) { ctx.answerCbQuery(); await activeAutomators[ctx.chat.id].step2_SetName(); }});
+bot.action('gh_3', async (ctx) => { if(requireSession(ctx)) { ctx.answerCbQuery(); await activeAutomators[ctx.chat.id].step3_SetBilling(); }});
+bot.action('gh_4', async (ctx) => { if(requireSession(ctx)) { ctx.answerCbQuery(); await activeAutomators[ctx.chat.id].step4_ApplyEdu(); }});
 
 bot.action('gh_save', async (ctx) => {
     if(!requireSession(ctx)) return;
     ctx.answerCbQuery();
-    const json = activeSessions[ctx.chat.id].exportState();
+    const json = activeAutomators[ctx.chat.id].exportState();
     await ctx.replyWithDocument(
-        { source: Buffer.from(json, 'utf-8'), filename: `GH_SESSION_${activeSessions[ctx.chat.id].username}.json` },
-        { caption: "Simpan file ini. Forward ke bot ini kapan saja untuk melanjutkan." }
+        { source: Buffer.from(json, 'utf-8'), filename: `GH_SESSION_${activeAutomators[ctx.chat.id].username}.json` }
     );
 });
 
@@ -220,8 +214,8 @@ bot.start(async (ctx) => {
         const user = getUser(ctx.from.id, ctx.startPayload);
         updateUser(ctx.from.id, { state: null, tempData: {} });
         
-        // Bersihkan prompt nyangkut jika ada
-        if (pendingPrompts[ctx.from.id]) delete pendingPrompts[ctx.from.id];
+        // Reset Admin Session jika user restart
+        if (adminSessions[ctx.from.id]) delete adminSessions[ctx.from.id];
 
         let keyboard = [
             ['💳 Generate KTM (Indo)', '🎓 Canva Education (K-12)'],
@@ -235,9 +229,7 @@ bot.start(async (ctx) => {
 
 // START
 console.log('🚀 BOT STABIL SIAP!');
-bot.launch({ dropPendingUpdates: true });
+bot.launch({ dropPendingUpdates: true }).catch(e => console.error("Launch Error:", e));
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
-
-// --- END OF FILE index.js ---
