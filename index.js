@@ -90,9 +90,15 @@ setupAdminHandler(bot);
 const ktmHandler = setupKTMHandler(bot);
 const canvaHandler = setupCanvaHandler(bot);
 
+// --- ADMIN PANEL ---
 const showAdminPanel = (ctx, automator) => {
     let status = "🔴 TIDAK AKTIF";
-    if (automator && automator.config.username) status = `🟢 AKTIF (${automator.config.username})`;
+    // === PERBAIKAN DI SINI ===
+    // Menggunakan optional chaining (?.) untuk mengakses properti secara aman
+    // Jika automator atau automator.config null/undefined, ekspresi akan berhenti dan tidak error
+    if (automator?.config?.username) {
+        status = `🟢 AKTIF (${automator.config.username})`;
+    }
 
     ctx.reply(
         `🛠 *GITHUB PANEL (DB MODE)*\nStatus: ${status}\n\n👇 *PILIH TAHAPAN:*`, {
@@ -109,7 +115,7 @@ const showAdminPanel = (ctx, automator) => {
 const getAutomator = (ctx) => {
     const user = getUser(ctx.chat.id);
     if (!user.ghSession) {
-        ctx.reply("⚠️ Tidak ada sesi di database. Klik '🆕 Data Baru' untuk memulai.");
+        // Jangan reply di sini, biarkan showAdminPanel yang menampilkan status tidak aktif
         return null;
     }
     return new GitHubAutomator(ctx, null, user.ghSession);
@@ -156,7 +162,7 @@ const createOtpCallback = (ctx) => (type) => {
 
 bot.action('gh_1', async (ctx) => {
     const auto = getAutomator(ctx);
-    if (!auto) return ctx.answerCbQuery('Sesi tidak ditemukan', { show_alert: true });
+    if (!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
 
     await ctx.answerCbQuery();
     await ctx.reply("🚀 Memulai proses login...");
@@ -173,7 +179,7 @@ bot.action('gh_1', async (ctx) => {
 
 bot.action('gh_2', async (ctx) => {
     const auto = getAutomator(ctx);
-    if(!auto) return ctx.answerCbQuery('Sesi tidak ditemukan', { show_alert: true });
+    if(!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
     
     await ctx.answerCbQuery();
     await ctx.reply("👤 Memulai proses pengaturan profil...");
@@ -189,7 +195,7 @@ bot.action('gh_2', async (ctx) => {
 
 bot.action('gh_2fa', async (ctx) => {
     const auto = getAutomator(ctx);
-    if (!auto) return ctx.answerCbQuery('Sesi tidak ditemukan', { show_alert: true });
+    if (!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
 
     await ctx.answerCbQuery();
     await ctx.reply("🔐 Memulai proses setup 2FA otomatis...");
@@ -221,7 +227,7 @@ bot.action('gh_2fa', async (ctx) => {
 
 bot.action('gh_3', async (ctx) => {
     const auto = getAutomator(ctx);
-    if(!auto) return ctx.answerCbQuery('Sesi tidak ditemukan', { show_alert: true });
+    if(!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
     
     await ctx.answerCbQuery();
     await ctx.reply("💳 Memulai proses pengaturan billing...");
@@ -237,7 +243,7 @@ bot.action('gh_3', async (ctx) => {
 
 bot.action('gh_4', async (ctx) => {
     const auto = getAutomator(ctx);
-    if(!auto) return ctx.answerCbQuery('Sesi tidak ditemukan', { show_alert: true });
+    if(!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
     
     await ctx.answerCbQuery();
     await ctx.reply("🎓 Memulai proses aplikasi student pack...");

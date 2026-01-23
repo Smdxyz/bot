@@ -14,7 +14,9 @@ export class GitHubAutomator {
         
         if (existingSession) {
             this.session = new HttpSession(existingSession.cookies);
-            this.config = existingSession.config || userConfig; 
+            // === PERBAIKAN DI SINI ===
+            // Pastikan this.config selalu menjadi objek, bahkan jika sesi lama tidak memilikinya.
+            this.config = existingSession.config || userConfig || {}; 
             this.state = existingSession.state || {};
             console.log("♻️ Session Resumed");
         } else {
