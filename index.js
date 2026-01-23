@@ -1,9 +1,9 @@
 // --- START OF FILE index.js ---
 
 import 'dotenv/config';
-import { Telegraf, Markup } from 'telegraf';
+import { Telegraf, Markup, session } from 'telegraf';
 import { getUser, updateUser } from './lib/db.js';
-import { EventEmitter } from 'events'; // Native Node.js, gak perlu install
+import { EventEmitter } from 'events';
 
 // BARU: Impor Automator
 import { GitHubAutomator } from './github_automator.js';
@@ -16,46 +16,64 @@ import { setupCanvaHandler } from './handlers/canva.js';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// --- SISTEM PROMPT MANUAL (PENGGANTI @telegraf/prompt) ---
+// --- SISTEM TANYA JAWAB MANUAL (EVENT BASED) ---
 const inputEvents = new EventEmitter();
-const waitingForInput = {}; // Menyimpan status user yang sedang diajak ngobrol
+const waitingForInput = {}; 
 
-// Fungsi helper untuk bertanya dan menunggu jawaban
+// Fungsi helper hapus pesan biar gak error kalau pesan udah ilang
+const safeDelete = async (chatId, msgId) => {
+    try {
+        await bot.telegram.deleteMessage(chatId, msgId);
+    } catch (e) {
+        // Abaikan error kalau pesan udah kehapus duluan
+    }
+};
+
+// Fungsi Helper Bertanya
 const askUser = (chatId, question, isPassword = false) => {
     return new Promise(async (resolve) => {
-        // Kirim pertanyaan
-        const msg = await bot.telegram.sendMessage(chatId, question, { parse_mode: 'Markdown' });
+        // 1. Kirim Pertanyaan
+        const qMsg = await bot.telegram.sendMessage(chatId, question, { parse_mode: 'Markdown' });
         
-        // Tandai user ini sedang menunggu input
+        // 2. Tandai lagi nunggu jawaban
         waitingForInput[chatId] = true;
+        console.log(`[BOT] Menunggu input dari ${chatId}...`);
 
-        // Listener sekali pakai untuk jawaban
-        inputEvents.once(`input_${chatId}`, async (answer, msgId) => {
-            delete waitingForInput[chatId]; // Hapus status menunggu
+        // 3. Pasang kuping (listener) buat jawaban
+        inputEvents.once(`input_${chatId}`, async (answer, answerMsgId) => {
+            delete waitingForInput[chatId]; // Udah dijawab, hapus status nunggu
             
-            // Hapus pesan input user biar bersih (opsional)
-            try {
-                await bot.telegram.deleteMessage(chatId, msgId);
-                if (isPassword) await bot.telegram.deleteMessage(chatId, msg.message_id); // Hapus pertanyaan password juga
-            } catch (e) {}
+            // Hapus jawaban user biar bersih
+            await safeDelete(chatId, answerMsgId);
+            
+            // Kalau ini password, hapus juga pertanyaannya biar rahasia
+            if (isPassword) {
+                await safeDelete(chatId, qMsg.message_id);
+            }
 
             resolve(answer);
         });
     });
 };
 
-// --- MIDDLEWARE ---
+// --- MIDDLEWARE UTAMA ---
+bot.use(session());
+
 bot.use(async (ctx, next) => {
-    // Cek apakah user ada di DB
+    // Cek apakah ini pesan teks biasa
     if (ctx.from && ctx.message && ctx.message.text && !ctx.message.text.startsWith('/')) {
-        // Jika user sedang dalam mode tanya-jawab admin, jangan proses command lain/DB
+        
+        // A. CEK APAKAH LAGI MODE TANYA JAWAB ADMIN?
         if (waitingForInput[ctx.from.id]) {
+            console.log(`[BOT] Menerima input dari ${ctx.from.first_name}: ${ctx.message.text}`);
+            // Kirim sinyal ke function askUser di atas
             inputEvents.emit(`input_${ctx.from.id}`, ctx.message.text, ctx.message.message_id);
-            return; // Stop di sini, jangan lanjut ke handler lain
+            return; // STOP DISINI, jangan diproses handler lain
         }
         
+        // B. Kalau bukan mode admin, proses user biasa (DB & Wizard)
         const user = getUser(ctx.from.id);
-        // Router untuk Wizard Canva/KTM (jika ada state)
+        
         if (user.state && user.state.startsWith('CANVA_WIZARD_')) {
             canvaHandler.handleWizardText(ctx);
             return;
@@ -83,29 +101,41 @@ bot.command('autogh', async (ctx) => {
         return ctx.reply("⛔️ Perintah ini hanya untuk admin.");
     }
     
-    try {
-        await ctx.deleteMessage().catch(()=>{});
+    // Hapus command /autogh nya
+    await safeDelete(ctx.chat.id, ctx.message.message_id);
 
-        // Pakai fungsi askUser buatan kita sendiri
+    try {
+        console.log(`[AUTOGH] Memulai sesi untuk ${ctx.from.first_name}`);
+
+        // 1. Tanya Username
         const username = await askUser(ctx.chat.id, '🤖 Silakan masukkan *Username GitHub*:');
-        const password = await askUser(ctx.chat.id, '🔑 Silakan masukkan *Password GitHub*: (Pesan ini akan dihapus)', true);
+        
+        // 2. Tanya Password
+        const password = await askUser(ctx.chat.id, '🔑 Silakan masukkan *Password GitHub*: (Pesan ini akan dihapus otomatis)', true);
+        
+        // 3. Tanya Email
         const email = await askUser(ctx.chat.id, '📧 Masukkan *Email Student* (wajib akses inbox):');
 
-        await ctx.reply('🚀 *Memulai Proses Otomatisasi...*\n_Duduk manis, biarkan bot bekerja._', { parse_mode: 'Markdown'});
+        // Konfirmasi mulai
+        const statusMsg = await ctx.reply('🚀 *Memulai Proses Otomatisasi...*\n_Mohon tunggu, bot sedang bekerja di server..._', { parse_mode: 'Markdown'});
 
-        // Inisialisasi Automator dengan fungsi askUser agar bisa minta OTP nanti
+        // Inisialisasi Automator
+        // Kita passing 'askUser' supaya automator bisa nanya OTP kalau butuh
         const automator = new GitHubAutomator(ctx, username, password, email, askUser);
         const result = await automator.run();
 
         if (result.success) {
             await ctx.reply('✅ *SUKSES BESAR!* Akun GitHub Education sedang diproses. Cek file recovery codes di atas.', { parse_mode: 'Markdown' });
         } else {
-            await ctx.reply('⚠️ Proses berhenti. Cek log error.');
+            await ctx.reply('⚠️ Proses berhenti. Cek log error di atas.');
         }
+        
+        // Hapus pesan "sedang bekerja" biar bersih
+        await safeDelete(ctx.chat.id, statusMsg.message_id);
 
     } catch (e) {
         console.error("AutoGH Error:", e);
-        ctx.reply(`Error: ${e.message}`);
+        ctx.reply(`❌ Error Fatal: ${e.message}`);
     }
 });
 
@@ -116,9 +146,10 @@ bot.start(async (ctx) => {
     updateUser(ctx.from.id, { state: null, tempData: {} });
 
     let welcomeMsg = `👋 *Halo, ${ctx.from.first_name}!*\n\nSelamat datang di Bot Dokumen All-in-One.`;
+    
     if (user.isNew && user.referrerId) {
-        welcomeMsg += `\n\n🎁 *BONUS REFERRAL!* +1500 Koin!`;
-        bot.telegram.sendMessage(user.referrerId, `🎉 Referral Sukses! +3000 Koin`).catch(e => {});
+        welcomeMsg += `\n\n🎁 *BONUS REFERRAL!* Kamu diundang dan mendapat +1500 Koin tambahan!\nTotal Saldo Awal: ${user.balance} Koin`;
+        bot.telegram.sendMessage(user.referrerId, `🎉 *Referral Sukses!*\nTemanmu ${ctx.from.first_name} telah bergabung. Kamu mendapatkan +3000 Koin!`, { parse_mode: 'Markdown' }).catch(e => {});
     }
 
     let keyboard = [
@@ -127,20 +158,30 @@ bot.start(async (ctx) => {
         [`🔗 Link Referral Saya`],
         ['ℹ️ Info Bot', '🆘 Bantuan']
     ];
+    // Hanya tampilkan tombol /autogh untuk admin di keyboard (opsional)
     if (ctx.from.id.toString() === process.env.OWNER_ID) {
-        keyboard.splice(3, 0, ['/autogh']); // Menu rahasia admin
+        keyboard.push(['/autogh']); 
     }
 
     ctx.replyWithMarkdown(welcomeMsg, Markup.keyboard(keyboard).resize());
 });
 
-// Listener Tombol
+// Listener Tombol Link Referral
 bot.hears('🔗 Link Referral Saya', (ctx) => {
     const user = getUser(ctx.from.id);
-    ctx.reply(`🔗 Link: https://t.me/${ctx.botInfo.username}?start=${user.ref_code}`);
+    const link = `https://t.me/${ctx.botInfo.username}?start=${user.ref_code}`;
+    ctx.reply(
+        `🔗 *Link Referral Anda:*\n\`${link}\`\n\n` +
+        `Bagikan link ini ke teman Anda. Jika mereka bergabung melalui link ini:\n` +
+        `💰 Anda akan mendapatkan: *3000 Koin*\n` +
+        `💰 Teman Anda akan mendapatkan: *1500 Koin*`,
+        { parse_mode: 'Markdown' }
+    );
 });
 
 // JALANKAN BOT
-bot.launch().then(() => console.log('🚀 BOT MODULAR SIAP & LEBIH KUAT!'));
+bot.launch().then(() => console.log('🚀 BOT MODULAR SIAP!'));
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
+// --- END OF FILE index.js ---
