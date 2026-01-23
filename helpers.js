@@ -1,12 +1,10 @@
 // helpers.js
-
 import { gotScraping } from 'got-scraping';
 import { CookieJar } from 'tough-cookie';
 import * as cheerio from 'cheerio';
 
 export class HttpSession {
     constructor(serializedCookies = null) {
-        // Jika ada cookie simpanan, load dulu
         this.cookieJar = serializedCookies 
             ? CookieJar.deserializeSync(serializedCookies) 
             : new CookieJar();
@@ -14,14 +12,14 @@ export class HttpSession {
         this.client = gotScraping.extend({
             cookieJar: this.cookieJar,
             headerGeneratorOptions: {
-                browsers: [{ name: 'chrome', minVersion: 115 }],
+                browsers: [{ name: 'chrome', minVersion: 120 }],
                 devices: ['desktop'],
                 locales: ['en-US', 'en'],
                 operatingSystems: ['linux', 'windows'],
             },
             headers: {
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'Accept-Language': 'en-GB,en;q=0.9',
+                'Accept-Language': 'en-US,en;q=0.9',
                 'Cache-Control': 'max-age=0',
                 'Sec-Fetch-Dest': 'document',
                 'Sec-Fetch-Mode': 'navigate',
@@ -35,20 +33,11 @@ export class HttpSession {
         });
     }
 
-    // Fitur Export Sesi biar bisa disimpan ke JSON
-    exportCookies() {
-        return this.cookieJar.serializeSync();
-    }
+    exportCookies() { return this.cookieJar.serializeSync(); }
 
     async get(url) {
-        try {
-            return await this.client.get(url);
-        } catch (error) {
-            if (error.response && (error.response.statusCode === 302 || error.response.statusCode === 303)) {
-                return error.response;
-            }
-            throw error;
-        }
+        try { return await this.client.get(url); } 
+        catch (error) { if (error.response?.statusCode >= 300 && error.response?.statusCode < 400) return error.response; throw error; }
     }
 
     async post(url, formBody, customHeaders = {}) {
@@ -62,29 +51,25 @@ export class HttpSession {
                     ...customHeaders
                 }
             });
-        } catch (error) {
-             if (error.response && (error.response.statusCode === 302 || error.response.statusCode === 303)) {
-                return error.response;
-            }
-            throw error;
-        }
+        } catch (error) { if (error.response?.statusCode >= 300 && error.response?.statusCode < 400) return error.response; throw error; }
     }
 }
 
 export function extractInputValue(html, name) {
     const $ = cheerio.load(html);
-    return $(`input[name="${name}"]`).val();
+    let val = $(`input[name="${name}"]`).val();
+    if(!val) {
+        // Fallback meta tag (khusus authenticity_token)
+        if(name === 'authenticity_token') val = $('meta[name="csrf-token"]').attr('content');
+    }
+    return val;
 }
 
-export function extractAllInputs(html, formIndex = 0) {
+export function extractAllInputs(html, formSelector = 0) {
     const $ = cheerio.load(html);
-    // Cari form yang spesifik atau default index 0
     let form;
-    if (typeof formIndex === 'string') {
-        form = $(formIndex); // Selector CSS (misal: 'form.edit_user')
-    } else {
-        form = $('form').eq(formIndex);
-    }
+    if (typeof formSelector === 'string') form = $(formSelector);
+    else form = $('form').eq(formSelector);
     
     if (!form.length) return {};
 
@@ -92,10 +77,14 @@ export function extractAllInputs(html, formIndex = 0) {
     form.find('input, textarea, select').each((i, el) => {
         const name = $(el).attr('name');
         const value = $(el).val();
-        if (name) {
-            inputs[name] = value || '';
-        }
+        if (name) inputs[name] = value || '';
     });
+    
+    // Auto inject token if missing in form but present in meta
+    if(!inputs['authenticity_token']) {
+        const metaToken = $('meta[name="csrf-token"]').attr('content');
+        if(metaToken) inputs['authenticity_token'] = metaToken;
+    }
 
     return inputs;
 }

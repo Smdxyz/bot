@@ -9,18 +9,15 @@ import { fakerID_ID as faker } from '@faker-js/faker';
 export class GitHubAutomator {
     constructor(ctx, username = '', password = '', email = '', existingState = null) {
         this.ctx = ctx;
-        this.otpCallback = null; // Fungsi untuk memanggil prompt OTP di index.js
-        this.otpResolver = null; // Fungsi untuk menyelesaikan promise OTP
+        this.username = username; // Default
         
         if (existingState) {
-            console.log("♻️ Restore Session...");
-            this.username = existingState.username;
-            this.password = existingState.password;
-            this.email = existingState.email;
-            this.profile = existingState.profile;
-            this.billingInfo = existingState.billingInfo;
+            // Rehydrate
+            Object.assign(this, existingState); // Copy semua properti dari JSON DB
             this.session = new HttpSession(existingState.cookies);
+            this.log(`♻️ Sesi diload: ${this.profile.fullName}`);
         } else {
+            // New Session
             this.username = username;
             this.password = password;
             this.email = email;
@@ -47,32 +44,18 @@ export class GitHubAutomator {
         }
     }
 
-    // Dipanggil dari index.js untuk set callback trigger OTP
-    setOtpCallback(cb) {
-        this.otpCallback = cb;
-    }
+    setOtpCallback(cb) { this.otpCallback = cb; }
 
-    // Dipanggil dari index.js saat user memasukkan kode OTP
-    resolveOtp(code) {
-        if (this.otpResolver) {
-            this.otpResolver(code);
-            this.otpResolver = null;
-        }
-    }
-
-    // Fungsi internal untuk menunggu OTP dari user
     async _waitForOtp() {
-        if (!this.otpCallback) throw new Error("OTP Callback belum diset di index.js");
-        
-        // Panggil prompt di Telegram
+        if (!this.otpCallback) throw new Error("Callback OTP belum diset.");
         await this.otpCallback();
-        
-        // Return Promise yang akan di-resolve oleh resolveOtp()
         return new Promise((resolve) => {
-            this.otpResolver = resolve;
+            global.otpResolver = resolve;
+            global.otpUserId = this.ctx.chat.id;
         });
     }
 
+    // PENTING: Method ini dipanggil index.js untuk save ke DB
     exportState() {
         return JSON.stringify({
             username: this.username,
@@ -80,9 +63,8 @@ export class GitHubAutomator {
             email: this.email,
             profile: this.profile,
             billingInfo: this.billingInfo,
-            cookies: this.session.exportCookies(),
-            timestamp: new Date().toISOString()
-        }, null, 2);
+            cookies: this.session.exportCookies()
+        });
     }
 
     async log(message) {
@@ -92,55 +74,77 @@ export class GitHubAutomator {
 
     // --- STEP 1: LOGIN ---
     async step1_Login() {
-        await this.log("🔑 [Step 1] Login dimulai...");
-        
+        await this.log("🔑 [Step 1] Login...");
         const page = await this.session.get('https://github.com/login');
         const formInputs = extractAllInputs(page.body, 0);
         
         formInputs.login = this.username;
         formInputs.password = this.password;
-        formInputs.commit = "Sign in";
 
         const res = await this.session.post('https://github.com/session', new URLSearchParams(formInputs).toString());
         
         if (res.statusCode === 302) {
             const loc = res.headers.location;
-            
-            // Kena OTP Email
             if (loc.includes('verified-device')) {
-                await this.log("⚠️ Masukkan OTP Email!");
-                
-                // Tunggu input dari user (via mekanisme resolveOtp)
+                await this.log("⚠️ Butuh OTP Email...");
                 const otp = await this._waitForOtp();
-                
                 const vPage = await this.session.get('https://github.com/sessions/verified-device');
                 const vInputs = extractAllInputs(vPage.body);
                 vInputs.otp = otp;
                 delete vInputs.commit;
                 
                 const vRes = await this.session.post('https://github.com/sessions/verified-device', new URLSearchParams(vInputs).toString());
-                if (vRes.statusCode !== 302) throw new Error("OTP Email Salah!");
-                
-                await this.log("✅ OTP Diterima.");
+                if (vRes.statusCode !== 302) throw new Error("OTP Salah!");
             }
         } else {
-             if (res.body.includes('Incorrect username')) throw new Error("Username/Password Salah!");
+             if (res.body.includes('Incorrect username')) throw new Error("Password Salah!");
         }
-
-        await this.log("✅ [Step 1] Login Sukses.");
+        await this.log("✅ Login Sukses.");
     }
 
-    // --- STEP 2: PROFILE ---
+    // --- STEP 2: PROFILE (PERBAIKAN SELECTOR) ---
     async step2_SetName() {
         await this.log(`📝 [Step 2] Set Nama: ${this.profile.fullName}`);
         const page = await this.session.get('https://github.com/settings/profile');
-        const formInputs = extractAllInputs(page.body, 'form.edit_user');
         
-        formInputs['user[profile_name]'] = this.profile.fullName;
-        formInputs['_method'] = 'put';
+        // Cek apakah halaman terload benar
+        if (!page.body.includes('Public profile')) {
+            throw new Error("Gagal load halaman profile. Mungkin sesi login habis. Coba Step 1 lagi.");
+        }
 
+        // Cari form yang punya input 'user[profile_name]'
+        // Kita tidak pakai selector CSS, tapi cari manual di text body
+        // karena library cheerio kadang bingung kalau ada form nested
+        let formInputs = extractAllInputs(page.body, 'form.edit_user'); // Coba selector class dulu
+        
+        if (!formInputs['user[profile_name]']) {
+             // Fallback: Ambil form index 0, 1, 2... sampai ketemu
+             for(let i=0; i<5; i++) {
+                 const temp = extractAllInputs(page.body, i);
+                 if (temp['user[profile_name]']) {
+                     formInputs = temp;
+                     break;
+                 }
+             }
+        }
+        
+        if (!formInputs['user[profile_name]']) {
+             throw new Error("Form Profile tidak ditemukan di HTML. GitHub mungkin mengubah layout.");
+        }
+
+        formInputs['user[profile_name]'] = this.profile.fullName;
+        // Hapus input file kosong biar gak error multipart
+        delete formInputs['user[profile_email]']; // Optional
+        
         const res = await this.session.post(`https://github.com/users/${this.username}`, new URLSearchParams(formInputs).toString());
-        if (res.statusCode !== 302) throw new Error("Gagal Update Profil.");
+        
+        if (res.statusCode !== 302) {
+             // Debugging: Print title halaman errornya
+            const title = res.body.match(/<title>(.*?)<\/title>/);
+            const errTitle = title ? title[1] : "Unknown Error";
+            console.log("FAIL BODY:", res.body.substring(0, 500));
+            throw new Error(`Gagal Update Profil. Status: ${res.statusCode}. Page: ${errTitle}`);
+        }
         await this.log("✅ Nama Sukses.");
     }
 
@@ -149,8 +153,23 @@ export class GitHubAutomator {
         await this.log(`💳 [Step 3] Set Billing...`);
         const page = await this.session.get('https://github.com/settings/billing/payment_information');
         
-        let formInputs = extractAllInputs(page.body, 0);
-        if (!formInputs['billing_contact[first_name]']) formInputs = extractAllInputs(page.body, 1);
+        // Cari form billing
+        let formInputs = {};
+        for(let i=0; i<5; i++) {
+             const temp = extractAllInputs(page.body, i);
+             if (temp['billing_contact[first_name]']) {
+                 formInputs = temp;
+                 break;
+             }
+        }
+
+        if(!formInputs['billing_contact[first_name]']) {
+             // Mungkin sudah terisi? Kita coba overwrite paksa dengan payload manual
+             // Ambil token dari meta tag kalau form gak ketemu
+             const token = extractInputValue(page.body, 'authenticity_token');
+             if(!token) throw new Error("Gagal ambil token billing.");
+             formInputs = { authenticity_token: token };
+        }
 
         formInputs['billing_contact[first_name]'] = this.billingInfo.firstName;
         formInputs['billing_contact[last_name]'] = this.billingInfo.lastName;
@@ -161,27 +180,29 @@ export class GitHubAutomator {
         formInputs['billing_contact[postal_code]'] = this.billingInfo.postalCode;
         formInputs['target'] = 'user';
         formInputs['contact_type'] = 'billing';
+        // Hapus submit button value lama jika ada
+        delete formInputs['submit']; 
 
         const res = await this.session.post('https://github.com/account/contact', new URLSearchParams(formInputs).toString());
-        if (res.statusCode !== 302) throw new Error("Gagal Update Billing.");
+        if (res.statusCode !== 302) throw new Error(`Gagal Update Billing. Status: ${res.statusCode}`);
         await this.log("✅ Billing Sukses.");
     }
 
     // --- STEP 4: EDU ---
     async step4_ApplyEdu() {
         await this.log(`🎓 [Step 4] Apply Edu...`);
-        
-        // 1. Cek Syarat 2FA
+        const schoolName = "NU University of Surakarta";
+        const schoolId = "82921";
+
         const page1 = await this.session.get('https://github.com/settings/education/benefits');
         if (page1.url.includes('two_factor_authentication/setup')) {
             throw new Error("⛔ WAJIB AKTIFKAN 2FA MANUAL DULU DI BROWSER!");
         }
 
-        // 2. Submit Data Sekolah
         const formInputs1 = extractAllInputs(page1.body);
         formInputs1['dev_pack_form[application_type]'] = 'student';
-        formInputs1['dev_pack_form[school_name]'] = "NU University of Surakarta";
-        formInputs1['dev_pack_form[selected_school_id]'] = "82921";
+        formInputs1['dev_pack_form[school_name]'] = schoolName;
+        formInputs1['dev_pack_form[selected_school_id]'] = schoolId;
         formInputs1['dev_pack_form[school_email]'] = this.email;
         formInputs1['dev_pack_form[latitude]'] = '-7.570020342507728';
         formInputs1['dev_pack_form[longitude]'] = '110.80568597565748';
@@ -193,7 +214,6 @@ export class GitHubAutomator {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Turbo-Frame': 'dev-pack-form' }
         });
 
-        // 3. Generate Bukti
         await this.log("🖼️ Membuat KTM...");
         const ktmData = generateSemiAuto({
             univName: "NU UNIVERSITY OF SURAKARTA",
@@ -201,15 +221,15 @@ export class GitHubAutomator {
             gender: this.profile.gender
         });
         const imgBuffer = await drawKTM(ktmData);
+        
         const photoData = JSON.stringify({
             image: `data:image/jpeg;base64,${imgBuffer.toString('base64')}`,
             metadata: { filename: "proof.jpg", type: "upload", mimeType: "image/jpeg" }
         });
 
-        // 4. Submit Final
         const formInputs2 = extractAllInputs(res1.body);
-        formInputs2['dev_pack_form[school_name]'] = "NU University of Surakarta";
-        formInputs2['dev_pack_form[selected_school_id]'] = "82921";
+        formInputs2['dev_pack_form[school_name]'] = schoolName;
+        formInputs2['dev_pack_form[selected_school_id]'] = schoolId;
         formInputs2['dev_pack_form[school_email]'] = this.email;
         formInputs2['dev_pack_form[latitude]'] = '-7.570020342507728';
         formInputs2['dev_pack_form[longitude]'] = '110.80568597565748';
@@ -226,10 +246,10 @@ export class GitHubAutomator {
         });
 
         if (finalRes.body.includes('Thanks for submitting')) {
-            await this.log("🎉 SUCCESS! Silakan cek email student.");
+            await this.log("🎉 SUCCESS! Cek email.");
         } else {
-            console.log("FAIL HTML:", finalRes.body.substring(0, 400));
-            throw new Error('Gagal Submit Edu. Cek log.');
+            console.log("FAIL HTML:", finalRes.body.substring(0, 300));
+            throw new Error('Gagal Submit Edu.');
         }
     }
 }
