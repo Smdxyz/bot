@@ -11,9 +11,11 @@ import * as cheerio from 'cheerio';
  * @param {function(string): void} logger Function to log progress.
  */
 export const handleLogin = async (session, config, otpCallback, logger) => {
+    const loginUrl = 'https://github.com/login';
+
     // 1. GET Login Page to retrieve authenticity_token
     logger('Mengambil halaman login...');
-    const loginPageRes = await session.get('https://github.com/login');
+    const loginPageRes = await session.get(loginUrl);
     if (loginPageRes.statusCode !== 200) {
         throw new Error(`Gagal memuat halaman login. Status: ${loginPageRes.statusCode}`);
     }
@@ -29,7 +31,9 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
 
     // 2. POST Login Credentials
     logger('Mengirim kredensial...');
-    const postLoginRes = await session.post('https://github.com/session', new URLSearchParams(loginPayload).toString());
+    const postLoginRes = await session.post('https://github.com/session', new URLSearchParams(loginPayload).toString(), {
+        Referer: loginUrl // Set specific Referer for this request
+    });
 
     const location = postLoginRes.headers.location;
     logger(`Redirect terdeteksi ke: ${location}`);
@@ -49,7 +53,9 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
         otpPayload.app_otp = otpCode;
 
         logger('Mengirim kode OTP Authenticator...');
-        const postOtpRes = await session.post('https://github.com/sessions/two-factor', new URLSearchParams(otpPayload).toString());
+        const postOtpRes = await session.post('https://github.com/sessions/two-factor', new URLSearchParams(otpPayload).toString(), {
+            Referer: location // Pass the correct Referer (the OTP page)
+        });
 
         if (postOtpRes.headers.location !== 'https://github.com/') {
             throw new Error('Gagal verifikasi 2FA Authenticator. Kode mungkin salah.');
@@ -70,7 +76,9 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
         verifyPayload.otp = emailOtp;
 
         logger('Mengirim kode OTP Email...');
-        const postVerifyRes = await session.post('https://github.com/sessions/verified-device', new URLSearchParams(verifyPayload).toString());
+        const postVerifyRes = await session.post('https://github.com/sessions/verified-device', new URLSearchParams(verifyPayload).toString(), {
+            Referer: location // Pass the correct Referer (the verification page)
+        });
 
         if (postVerifyRes.headers.location !== 'https://github.com/') {
             throw new Error('Gagal verifikasi perangkat via email. Kode mungkin salah.');
@@ -80,7 +88,9 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
     // Case 3: Direct login success (no 2FA)
     } else if (location !== 'https://github.com/') {
         // If it redirects somewhere else, it's likely a failure (e.g., wrong password)
-        throw new Error(`Login gagal. Redirect tidak terduga ke: ${location}`);
+        const $ = cheerio.load(postLoginRes.body);
+        const errorMessage = $('.flash-error').text().trim();
+        throw new Error(`Login gagal. Pesan dari GitHub: "${errorMessage || 'Kredensial salah.'}"`);
     }
 
     // 4. Final Verification: Check the dashboard page
@@ -95,7 +105,7 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
         if (env.login && env.login.toLowerCase() === config.username.toLowerCase()) {
             logger(`✅ Login berhasil sebagai: ${env.login}`);
         } else {
-            throw new Error(`Verifikasi gagal. User yang login (${env.login}) tidak sesuai dengan target (${config.username}).`);
+            throw new Error(`Verifikasi gagal. User yang login (${env.login || 'tidak diketahui'}) tidak sesuai dengan target (${config.username}).`);
         }
     } catch (e) {
         throw new Error(`Gagal mem-parsing data sesi setelah login. Mungkin halaman tidak termuat sempurna. Error: ${e.message}`);
