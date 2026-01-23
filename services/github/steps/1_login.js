@@ -21,14 +21,17 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
     }
 
     const loginPayload = extractAllInputs(loginPageRes.body, 'form[action="/session"]');
-    if (!loginPayload.authenticity_token) {
-        throw new Error('Gagal mengekstrak authenticity_token dari halaman login.');
+    if (!loginPayload.authenticity_token || !loginPayload.timestamp) {
+        throw new Error('Gagal mengekstrak field penting (token/timestamp) dari halaman login.');
     }
     
     loginPayload.login = config.username;
     loginPayload.password = config.password;
-    logger(`Token login ditemukan: ${loginPayload.authenticity_token.substring(0, 10)}...`);
     
+    // Debugging log
+    const { password, ...payloadToLog } = loginPayload;
+    logger(`Payload login disiapkan: ${JSON.stringify(payloadToLog).substring(0, 100)}...`);
+
     // 2. POST Login Credentials
     logger('Mengirim kredensial...');
     const postLoginRes = await session.post('https://github.com/session', new URLSearchParams(loginPayload).toString(), {
@@ -37,17 +40,20 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
 
     const location = postLoginRes.headers.location;
 
-    // Early exit if login failed (e.g. wrong password)
+    // Handle early failure (e.g., wrong password)
     if (postLoginRes.statusCode === 200 && postLoginRes.url.includes('/login')) {
         const $ = cheerio.load(postLoginRes.body);
         const errorMessage = $('.flash-error').text().trim();
         throw new Error(`Login gagal. Pesan dari GitHub: "${errorMessage || 'Kredensial salah.'}"`);
     }
 
+    if (!location) {
+        throw new Error('Login gagal. Tidak ada redirect setelah mengirim kredensial.');
+    }
     logger(`Redirect terdeteksi ke: ${location}`);
 
     // 3. Handle Redirects for 2FA or Success
-    if (location && (location.includes('/sessions/two-factor/app') || location.includes('/sessions/verified-device'))) {
+    if (location.includes('/sessions/two-factor/app') || location.includes('/sessions/verified-device')) {
         const isAppAuth = location.includes('/sessions/two-factor/app');
         const twoFactorPageUrl = location;
         
@@ -66,7 +72,7 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
 
         logger('Mengirim kode OTP...');
         const postOtpRes = await session.post(`https://github.com${formAction}`, new URLSearchParams(otpPayload).toString(), {
-            'Referer': twoFactorPageUrl // === INI KUNCI PERBAIKANNYA ===
+            'Referer': twoFactorPageUrl
         });
 
         if (postOtpRes.statusCode !== 302 || !postOtpRes.headers.location?.endsWith('github.com/')) {
@@ -74,8 +80,8 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
         }
         logger('Verifikasi 2FA berhasil.');
 
-    } else if (location !== 'https://github.com/') {
-        throw new Error(`Login gagal. Redirect tidak terduga ke: ${location}`);
+    } else if (!location.endsWith('github.com/')) {
+        throw new Error(`Login berhasil tetapi redirect tidak terduga ke: ${location}`);
     }
 
     // 4. Final Verification: Check the dashboard page
