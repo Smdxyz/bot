@@ -25,17 +25,24 @@ bot.use(async (ctx, next) => {
     if (!ctx.from) return next();
     const userId = ctx.from.id;
     
-    try { getUser(userId); } catch (e) {}
+    // Inisialisasi user di awal
+    getUser(userId); 
     const user = getUser(userId);
 
+    // Prioritas utama: Menangani input untuk alur admin yang aktif
     if (adminFlows[userId] && adminFlows[userId].step) {
         const flow = adminFlows[userId];
         const text = ctx.message?.text;
 
-        if (!text) return;
+        if (!text) { // Abaikan update non-teks
+            return;
+        }
 
         await safeDelete(ctx, ctx.message.message_id);
-        if(flow.lastBotMsg) await safeDelete(ctx, flow.lastBotMsg);
+        if(flow.lastBotMsg) {
+            await safeDelete(ctx, flow.lastBotMsg);
+            delete flow.lastBotMsg; // Hapus setelah digunakan
+        }
 
         switch (flow.step) {
             case 'WAITING_USERNAME':
@@ -59,7 +66,7 @@ bot.use(async (ctx, next) => {
                 const automator = new GitHubAutomator(ctx, { username, password, email });
                 
                 updateUser(userId, { ghSession: JSON.parse(automator.exportData()) });
-                delete adminFlows[userId];
+                delete adminFlows[userId]; // Selesaikan alur
                 
                 await ctx.reply(`✅ Data Tersimpan di Database!\n👤 Target: ${username}`);
                 showAdminPanel(ctx, automator);
@@ -67,24 +74,28 @@ bot.use(async (ctx, next) => {
             
             case 'WAITING_OTP':
                 if (flow.resolveOtp) {
-                    flow.resolveOtp(text);
-                    delete flow.resolveOtp;
-                    flow.step = null;
+                    flow.resolveOtp(text); // Kirim OTP ke Promise yang sedang menunggu
+                    // Hapus state setelah OTP terkirim, biarkan proses async berlanjut
+                    delete flow.resolveOtp; 
+                    flow.step = null; 
                     await ctx.reply("🔄 Memproses OTP...");
                 }
                 break;
         }
-        return;
+        return; // Hentikan middleware di sini karena input sudah diproses
     }
 
+    // Prioritas kedua: Menangani input untuk wizard KTM/Canva
     if (user && user.state) {
         if (user.state.startsWith('CANVA_WIZARD_')) { await canvaHandler.handleWizardText(ctx); return; }
         if (user.state.startsWith('KTM_WIZARD_')) { await ktmHandler.handleWizardText(ctx); return; }
     }
     
+    // Jika tidak ada alur aktif, lanjutkan ke handler Telegraf lainnya (.command, .hears)
     await next();
 });
 
+// Load Handlers
 setupMenuHandler(bot);
 setupAdminHandler(bot);
 const ktmHandler = setupKTMHandler(bot);
@@ -93,9 +104,6 @@ const canvaHandler = setupCanvaHandler(bot);
 // --- ADMIN PANEL ---
 const showAdminPanel = (ctx, automator) => {
     let status = "🔴 TIDAK AKTIF";
-    // === PERBAIKAN DI SINI ===
-    // Menggunakan optional chaining (?.) untuk mengakses properti secara aman
-    // Jika automator atau automator.config null/undefined, ekspresi akan berhenti dan tidak error
     if (automator?.config?.username) {
         status = `🟢 AKTIF (${automator.config.username})`;
     }
@@ -115,7 +123,6 @@ const showAdminPanel = (ctx, automator) => {
 const getAutomator = (ctx) => {
     const user = getUser(ctx.chat.id);
     if (!user.ghSession) {
-        // Jangan reply di sini, biarkan showAdminPanel yang menampilkan status tidak aktif
         return null;
     }
     return new GitHubAutomator(ctx, null, user.ghSession);
@@ -139,6 +146,7 @@ bot.action('gh_new', async (ctx) => {
     adminFlows[ctx.chat.id].lastBotMsg = msg.message_id;
 });
 
+// Fungsi terpusat untuk membuat callback OTP
 const createOtpCallback = (ctx) => (type) => {
     let prompt;
     if (type === 'authenticator_setup') {
@@ -149,112 +157,96 @@ const createOtpCallback = (ctx) => (type) => {
         prompt = "📩 Masukkan kode verifikasi dari *Email* Anda:";
     }
 
-    ctx.reply(prompt, { parse_mode: 'Markdown' });
-
-    return new Promise(resolve => {
-        adminFlows[ctx.from.id] = { 
-            ...adminFlows[ctx.from.id],
+    return new Promise(async (resolve) => {
+        const msg = await ctx.reply(prompt, { parse_mode: 'Markdown' });
+        adminFlows[ctx.from.id] = {
             step: 'WAITING_OTP',
-            resolveOtp: resolve 
+            resolveOtp: resolve,
+            lastBotMsg: msg.message_id,
         };
     });
 };
 
-bot.action('gh_1', async (ctx) => {
+// === PERBAIKAN LOGIKA ERROR HANDLING DI SEMUA ACTION HANDLER ===
+
+async function runAutomatorStep(ctx, stepFunction, successMessage) {
     const auto = getAutomator(ctx);
-    if (!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
-
-    await ctx.answerCbQuery();
-    await ctx.reply("🚀 Memulai proses login...");
-
-    try {
-        await auto.runStep1_Login(createOtpCallback(ctx));
-        saveSession(ctx, auto);
-        await ctx.reply(`✅ Login sebagai *${auto.config.username}* berhasil! Sesi disimpan.`, { parse_mode: 'Markdown' });
-    } catch (e) {
-        await ctx.reply(`❌ Error Step 1: ${e.message}`);
-        delete adminFlows[ctx.from.id];
+    if (!auto) {
+        await ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
+        return;
     }
-});
-
-bot.action('gh_2', async (ctx) => {
-    const auto = getAutomator(ctx);
-    if(!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
     
     await ctx.answerCbQuery();
-    await ctx.reply("👤 Memulai proses pengaturan profil...");
+    await ctx.reply(`🚀 Memulai proses...`);
 
     try {
-        await auto.runStep2_Profile();
+        const result = await stepFunction(auto);
         saveSession(ctx, auto);
-        await ctx.reply(`✅ Step 2 Selesai. Nama profil telah diatur menjadi *${auto.config.fullName}*.`, { parse_mode: 'Markdown' });
-    } catch(e) {
-        ctx.reply(`❌ Error Step 2: ${e.message}`);
-    }
-});
-
-bot.action('gh_2fa', async (ctx) => {
-    const auto = getAutomator(ctx);
-    if (!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
-
-    await ctx.answerCbQuery();
-    await ctx.reply("🔐 Memulai proses setup 2FA otomatis...");
-
-    try {
-        const { setupKey, recoveryCodes } = await auto.runStep2_5_2FASetup();
-        saveSession(ctx, auto);
-
-        const fileContent = `Two-Factor Authentication Setup for GitHub: ${auto.config.username}\n\n` +
-                            `===================================================\n` +
-                            `IMPORTANT: Simpan informasi ini di tempat yang aman.\n` +
-                            `===================================================\n\n` +
-                            `Setup Key (untuk dimasukkan manual ke authenticator app):\n${setupKey}\n\n` +
-                            `Recovery Codes (jika Anda kehilangan akses ke authenticator):\n` +
-                            `${recoveryCodes.join('\n')}\n`;
-
-        await ctx.replyWithDocument(
-            { source: Buffer.from(fileContent, 'utf-8'), filename: `github-2fa-recovery-${auto.config.username}.txt` },
-            { caption: `✅ 2FA berhasil diaktifkan! **SIMPAN FILE INI DENGAN AMAN!** Anda akan membutuhkannya jika kehilangan akses.` }
-        );
-
+        await ctx.reply(successMessage(auto, result), { parse_mode: 'Markdown' });
     } catch (e) {
-        await ctx.reply(`❌ Error Step 2.5: ${e.message}`);
-        if (adminFlows[ctx.from.id] && adminFlows[ctx.from.id].step === 'WAITING_OTP') {
+        console.error(`🔥 Error pada step: ${e.stack}`);
+        await ctx.reply(`❌ Terjadi error: ${e.message}`);
+    } finally {
+        // Bersihkan state menunggu OTP jika ada, untuk mencegah bot stuck
+        if (adminFlows[ctx.from.id]?.step === 'WAITING_OTP') {
             delete adminFlows[ctx.from.id];
         }
     }
+}
+
+bot.action('gh_1', async (ctx) => {
+    await runAutomatorStep(
+        ctx,
+        (auto) => auto.runStep1_Login(createOtpCallback(ctx)),
+        (auto) => `✅ Login sebagai *${auto.config.username}* berhasil! Sesi disimpan.`
+    );
+});
+
+bot.action('gh_2', async (ctx) => {
+    await runAutomatorStep(
+        ctx,
+        (auto) => auto.runStep2_Profile(),
+        (auto) => `✅ Step 2 Selesai. Nama profil telah diatur menjadi *${auto.config.fullName}*.`
+    );
+});
+
+bot.action('gh_2fa', async (ctx) => {
+    await runAutomatorStep(
+        ctx,
+        (auto) => auto.runStep2_5_2FASetup(), // Tidak perlu OTP callback lagi
+        (auto, result) => {
+            const { setupKey, recoveryCodes } = result;
+            const fileContent = `Two-Factor Authentication Setup for GitHub: ${auto.config.username}\n\n` +
+                                `===================================================\n` +
+                                `IMPORTANT: Simpan informasi ini di tempat yang aman.\n` +
+                                `===================================================\n\n` +
+                                `Setup Key (untuk dimasukkan manual ke authenticator app):\n${setupKey}\n\n` +
+                                `Recovery Codes (jika Anda kehilangan akses ke authenticator):\n` +
+                                `${recoveryCodes.join('\n')}\n`;
+
+            ctx.replyWithDocument(
+                { source: Buffer.from(fileContent, 'utf-8'), filename: `github-2fa-recovery-${auto.config.username}.txt` },
+                { caption: `✅ 2FA berhasil diaktifkan! **SIMPAN FILE INI DENGAN AMAN!**` }
+            );
+            return '✅ Step 2.5 Selesai. File recovery dikirim.';
+        }
+    );
 });
 
 bot.action('gh_3', async (ctx) => {
-    const auto = getAutomator(ctx);
-    if(!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
-    
-    await ctx.answerCbQuery();
-    await ctx.reply("💳 Memulai proses pengaturan billing...");
-
-    try {
-        await auto.runStep3_Billing();
-        saveSession(ctx, auto);
-        await ctx.reply("✅ Step 3 Selesai. Informasi penagihan telah disimpan.");
-    } catch(e) {
-        ctx.reply(`❌ Error Step 3: ${e.message}`);
-    }
+    await runAutomatorStep(
+        ctx,
+        (auto) => auto.runStep3_Billing(),
+        () => "✅ Step 3 Selesai. Informasi penagihan telah disimpan."
+    );
 });
 
 bot.action('gh_4', async (ctx) => {
-    const auto = getAutomator(ctx);
-    if(!auto) return ctx.answerCbQuery('Sesi tidak ditemukan. Buat data baru dulu.', { show_alert: true });
-    
-    await ctx.answerCbQuery();
-    await ctx.reply("🎓 Memulai proses aplikasi student pack...");
-    
-    try {
-        await auto.runStep4_Education();
-        saveSession(ctx, auto);
-        await ctx.reply("✅ Step 4 (Final) Selesai. Aplikasi GitHub Student Developer Pack telah berhasil dikirim dan sedang ditinjau.");
-    } catch(e) {
-        ctx.reply(`❌ Error Step 4: ${e.message}`);
-    }
+    await runAutomatorStep(
+        ctx,
+        (auto) => auto.runStep4_Education(),
+        () => "✅ Step 4 (Final) Selesai. Aplikasi GitHub Student Developer Pack telah berhasil dikirim dan sedang ditinjau."
+    );
 });
 
 bot.start(async (ctx) => {
