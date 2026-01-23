@@ -24,80 +24,68 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
     if (!loginPayload.authenticity_token) {
         throw new Error('Gagal mengekstrak authenticity_token dari halaman login.');
     }
-
+    
     loginPayload.login = config.username;
     loginPayload.password = config.password;
     logger(`Token login ditemukan: ${loginPayload.authenticity_token.substring(0, 10)}...`);
-
+    
     // 2. POST Login Credentials
     logger('Mengirim kredensial...');
     const postLoginRes = await session.post('https://github.com/session', new URLSearchParams(loginPayload).toString(), {
-        Referer: loginUrl // Set specific Referer for this request
+        'Referer': loginUrl
     });
 
     const location = postLoginRes.headers.location;
-    logger(`Redirect terdeteksi ke: ${location}`);
 
-    // 3. Handle Redirects for 2FA or Success
-    // Case 1: 2FA via Authenticator App is required
-    if (location && location.includes('/sessions/two-factor/app')) {
-        logger('Terdeteksi 2FA via Authenticator App...');
-        
-        const otpPageRes = await session.get(location);
-        const otpPayload = extractAllInputs(otpPageRes.body, 'form[action="/sessions/two-factor"]');
-        if (!otpPayload.authenticity_token) {
-            throw new Error('Gagal mendapatkan token dari halaman 2FA Authenticator.');
-        }
-
-        const otpCode = await otpCallback('authenticator');
-        otpPayload.app_otp = otpCode;
-
-        logger('Mengirim kode OTP Authenticator...');
-        const postOtpRes = await session.post('https://github.com/sessions/two-factor', new URLSearchParams(otpPayload).toString(), {
-            Referer: location // Pass the correct Referer (the OTP page)
-        });
-
-        if (postOtpRes.headers.location !== 'https://github.com/') {
-            throw new Error('Gagal verifikasi 2FA Authenticator. Kode mungkin salah.');
-        }
-        logger('Verifikasi 2FA Authenticator berhasil.');
-
-    // Case 2: 2FA via Email (New Device Verification) is required
-    } else if (location && location.includes('/sessions/verified-device')) {
-        logger('Terdeteksi verifikasi perangkat baru (Email OTP)...');
-
-        const verifyPageRes = await session.get(location);
-        const verifyPayload = extractAllInputs(verifyPageRes.body, 'form[action="/sessions/verified-device"]');
-         if (!verifyPayload.authenticity_token) {
-            throw new Error('Gagal mendapatkan token dari halaman verifikasi perangkat.');
-        }
-
-        const emailOtp = await otpCallback('email');
-        verifyPayload.otp = emailOtp;
-
-        logger('Mengirim kode OTP Email...');
-        const postVerifyRes = await session.post('https://github.com/sessions/verified-device', new URLSearchParams(verifyPayload).toString(), {
-            Referer: location // Pass the correct Referer (the verification page)
-        });
-
-        if (postVerifyRes.headers.location !== 'https://github.com/') {
-            throw new Error('Gagal verifikasi perangkat via email. Kode mungkin salah.');
-        }
-        logger('Verifikasi perangkat via email berhasil.');
-        
-    // Case 3: Direct login success (no 2FA)
-    } else if (location !== 'https://github.com/') {
-        // If it redirects somewhere else, it's likely a failure (e.g., wrong password)
+    // Early exit if login failed (e.g. wrong password)
+    if (postLoginRes.statusCode === 200 && postLoginRes.url.includes('/login')) {
         const $ = cheerio.load(postLoginRes.body);
         const errorMessage = $('.flash-error').text().trim();
         throw new Error(`Login gagal. Pesan dari GitHub: "${errorMessage || 'Kredensial salah.'}"`);
     }
 
+    logger(`Redirect terdeteksi ke: ${location}`);
+
+    // 3. Handle Redirects for 2FA or Success
+    if (location && (location.includes('/sessions/two-factor/app') || location.includes('/sessions/verified-device'))) {
+        const isAppAuth = location.includes('/sessions/two-factor/app');
+        const twoFactorPageUrl = location;
+        
+        logger(`Memerlukan verifikasi 2FA (${isAppAuth ? 'Authenticator App' : 'Email'})...`);
+        const otpPageRes = await session.get(twoFactorPageUrl);
+
+        const formAction = isAppAuth ? '/sessions/two-factor' : '/sessions/verified-device';
+        const otpPayload = extractAllInputs(otpPageRes.body, `form[action="${formAction}"]`);
+        
+        if (!otpPayload.authenticity_token) {
+            throw new Error(`Gagal mendapatkan token dari halaman 2FA (${twoFactorPageUrl}).`);
+        }
+
+        const otpCode = await otpCallback(isAppAuth ? 'authenticator' : 'email');
+        otpPayload[isAppAuth ? 'app_otp' : 'otp'] = otpCode;
+
+        logger('Mengirim kode OTP...');
+        const postOtpRes = await session.post(`https://github.com${formAction}`, new URLSearchParams(otpPayload).toString(), {
+            'Referer': twoFactorPageUrl // === INI KUNCI PERBAIKANNYA ===
+        });
+
+        if (postOtpRes.statusCode !== 302 || !postOtpRes.headers.location?.endsWith('github.com/')) {
+             throw new Error(`Verifikasi 2FA gagal. Kode mungkin salah atau sesi kadaluarsa.`);
+        }
+        logger('Verifikasi 2FA berhasil.');
+
+    } else if (location !== 'https://github.com/') {
+        throw new Error(`Login gagal. Redirect tidak terduga ke: ${location}`);
+    }
+
     // 4. Final Verification: Check the dashboard page
     logger('Verifikasi sesi login di halaman utama...');
     const finalRes = await session.get('https://github.com/');
-    const $ = cheerio.load(finalRes.body);
+    if (finalRes.statusCode !== 200) {
+        throw new Error(`Gagal membuka halaman utama setelah login. Status: ${finalRes.statusCode}`);
+    }
 
+    const $ = cheerio.load(finalRes.body);
     try {
         const envJson = $('#client-env').text();
         const env = JSON.parse(envJson);
