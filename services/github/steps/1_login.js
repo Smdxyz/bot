@@ -24,11 +24,10 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
     if (!loginPayload.authenticity_token || !loginPayload.timestamp) {
         throw new Error('Gagal mengekstrak field penting (token/timestamp) dari halaman login.');
     }
-    
+
     loginPayload.login = config.username;
     loginPayload.password = config.password;
-    
-    // Debugging log
+
     const { password, ...payloadToLog } = loginPayload;
     logger(`Payload login disiapkan: ${JSON.stringify(payloadToLog).substring(0, 100)}...`);
 
@@ -56,13 +55,13 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
     if (location.includes('/sessions/two-factor/app') || location.includes('/sessions/verified-device')) {
         const isAppAuth = location.includes('/sessions/two-factor/app');
         const twoFactorPageUrl = location;
-        
+
         logger(`Memerlukan verifikasi 2FA (${isAppAuth ? 'Authenticator App' : 'Email'})...`);
         const otpPageRes = await session.get(twoFactorPageUrl);
 
         const formAction = isAppAuth ? '/sessions/two-factor' : '/sessions/verified-device';
         const otpPayload = extractAllInputs(otpPageRes.body, `form[action="${formAction}"]`);
-        
+
         if (!otpPayload.authenticity_token) {
             throw new Error(`Gagal mendapatkan token dari halaman 2FA (${twoFactorPageUrl}).`);
         }
@@ -75,9 +74,19 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
             'Referer': twoFactorPageUrl
         });
 
-        if (postOtpRes.statusCode !== 302 || !postOtpRes.headers.location?.endsWith('github.com/')) {
-             throw new Error(`Verifikasi 2FA gagal. Kode mungkin salah atau sesi kadaluarsa.`);
+        // === PERBAIKAN UTAMA ADA DI SINI ===
+        // Jika status code 200 dan URL masih di halaman 2FA, artinya kode OTP salah.
+        if (postOtpRes.statusCode === 200 && postOtpRes.url.includes(formAction.slice(1))) {
+            const $ = cheerio.load(postOtpRes.body);
+            const errorMessage = $('#js-flash-container .flash-error').text().trim();
+            throw new Error(`Verifikasi 2FA gagal. ${errorMessage || 'Kode OTP yang Anda masukkan salah.'}`);
         }
+
+        // Jika tidak ada redirect (bukan 302) atau redirect ke lokasi yang aneh, lempar error.
+        if (postOtpRes.statusCode !== 302 || !postOtpRes.headers.location?.endsWith('github.com/')) {
+             throw new Error(`Verifikasi 2FA gagal. Respon tidak terduga setelah mengirim OTP. Redirect: ${postOtpRes.headers.location || 'tidak ada'}`);
+        }
+
         logger('Verifikasi 2FA berhasil.');
 
     } else if (!location.endsWith('github.com/')) {
@@ -105,4 +114,5 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
         throw new Error(`Gagal mem-parsing data sesi setelah login. Mungkin halaman tidak termuat sempurna. Error: ${e.message}`);
     }
 };
+
 // --- END OF FILE services/github/steps/1_login.js ---
