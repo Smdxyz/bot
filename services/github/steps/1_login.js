@@ -34,7 +34,6 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
 
     const location = postLoginRes.headers.location;
 
-    // Handle wrong password
     if (postLoginRes.statusCode === 200 && postLoginRes.url.includes('/login')) {
         const $ = cheerio.load(postLoginRes.body);
         const errorMessage = $('.flash-error').text().trim();
@@ -46,7 +45,7 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
     }
     logger(`Redirect terdeteksi ke: ${location}`);
 
-    let finalRes; // Definisikan di sini untuk digunakan nanti
+    let finalPageResponse; // Variabel untuk menampung respons halaman final
 
     // 3. Handle 2FA or Success Redirect
     if (location.includes('/sessions/two-factor/app') || location.includes('/sessions/verified-device')) {
@@ -71,7 +70,6 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
             'Referer': twoFactorPageUrl
         });
         
-        // Cek jika OTP salah
         if (postOtpRes.statusCode === 200 && postOtpRes.url.includes(formAction.slice(1))) {
             const $ = cheerio.load(postOtpRes.body);
             const errorMessage = $('#js-flash-container .flash-error').text().trim();
@@ -79,33 +77,31 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
         }
         
         // **PERBAIKAN UTAMA: TANGANI REDIRECT SECARA MANUAL**
-        // Jika OTP berhasil, kita akan mendapatkan 302 redirect ke homepage.
         if (postOtpRes.statusCode !== 302 || !postOtpRes.headers.location?.endsWith('github.com/')) {
-             throw new Error(`Verifikasi 2FA gagal. Respon tidak terduga. Redirect: ${postOtpRes.headers.location || 'tidak ada'}`);
+             throw new Error(`Verifikasi 2FA gagal. Respon tidak terduga setelah mengirim OTP. Redirect: ${postOtpRes.headers.location || 'tidak ada'}`);
         }
         
         logger('Verifikasi 2FA berhasil. Mengikuti redirect ke halaman utama...');
         // Ikuti redirect secara manual untuk mendapatkan cookie sesi final
-        finalRes = await session.get(postOtpRes.headers.location, { 'Referer': `https://github.com${formAction}` });
+        finalPageResponse = await session.get(postOtpRes.headers.location, { 'Referer': `https://github.com${formAction}` });
 
     } else if (location.endsWith('github.com/')) {
-        // Jika login berhasil tanpa 2FA, kita juga perlu mengikuti redirect
         logger('Login berhasil tanpa 2FA. Mengikuti redirect...');
-        finalRes = await session.get(location, { 'Referer': loginUrl });
+        finalPageResponse = await session.get(location, { 'Referer': loginUrl });
     } else {
         throw new Error(`Login berhasil tetapi redirect tidak terduga ke: ${location}`);
     }
 
     // 4. Final Verification
     logger('Verifikasi sesi login di halaman utama...');
-    if (finalRes.statusCode !== 200) {
-        throw new Error(`Gagal membuka halaman utama setelah login. Status: ${finalRes.statusCode}`);
+    if (finalPageResponse.statusCode !== 200) {
+        throw new Error(`Gagal membuka halaman utama setelah login. Status: ${finalPageResponse.statusCode}`);
     }
 
-    const $ = cheerio.load(finalRes.body);
+    const $ = cheerio.load(finalPageResponse.body);
     try {
         const envJson = $('#client-env').text();
-        if (!envJson) throw new Error("Elemen #client-env tidak ditemukan. Halaman mungkin tidak termuat dengan benar.");
+        if (!envJson) throw new Error("Elemen #client-env tidak ditemukan. Halaman dashboard mungkin tidak termuat dengan benar.");
         
         const env = JSON.parse(envJson);
         if (env.login && env.login.toLowerCase() === config.username.toLowerCase()) {
@@ -114,7 +110,8 @@ export const handleLogin = async (session, config, otpCallback, logger) => {
             throw new Error(`Verifikasi gagal. User yang login (${env.login || 'tidak diketahui'}) tidak sesuai dengan target (${config.username}).`);
         }
     } catch (e) {
-        throw new Error(`Gagal mem-parsing data sesi setelah login. Mungkin halaman tidak termuat sempurna. Error: ${e.message}`);
+        throw new Error(`Gagal mem-parsing data sesi setelah login. Error: ${e.message}`);
     }
 };
+
 // --- END OF FILE services/github/steps/1_login.js ---
