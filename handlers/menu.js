@@ -2,58 +2,66 @@ import { Markup } from 'telegraf';
 import { getUser, updateUser } from '../lib/db.js';
 
 export const setupMenuHandler = (bot) => {
+    
+    bot.start((ctx) => {
+        // Ambil payload referral (misal: t.me/bot?start=KODE123)
+        const refPayload = ctx.startPayload || null;
+        const user = getUser(ctx.from.id, refPayload);
 
-    // 1. PROFIL
+        let msg = `👋 *Halo, ${ctx.from.first_name}!*\n\nSelamat datang di Bot Tools Indonesia.\n`;
+        if(user.isNew) msg += `🎁 *Bonus Pengguna Baru:* +2500 Koin!\n`;
+        
+        ctx.replyWithMarkdown(msg, Markup.keyboard([
+            ['💳 Generate KTM', '🎓 Canva Education'],
+            ['👤 Profil Saya', '📅 Daily Absen'],
+            ['🆘 Bantuan', 'ℹ️ Info']
+        ]).resize());
+    });
+
     bot.hears('👤 Profil Saya', (ctx) => {
         const user = getUser(ctx.from.id);
-        let status = user.vip ? '👑 VIP Member' : 'Regular User';
-        if(user.vip && user.vipExp) {
-            const daysLeft = Math.ceil((user.vipExp - Date.now()) / (1000 * 60 * 60 * 24));
-            status += ` (${daysLeft} Hari)`;
+        let status = user.vip ? '👑 *VIP MEMBER*' : 'Regular User';
+        if(user.vip) {
+            const daysLeft = Math.ceil((user.vip_exp - Date.now()) / (1000 * 60 * 60 * 24));
+            status += `\n⏳ Sisa VIP: ${daysLeft} Hari`;
         }
 
         ctx.replyWithMarkdown(
-            `👤 *PROFIL PENGGUNA*\n\n` +
+            `👤 *INFORMASI PENGGUNA*\n\n` +
             `🆔 ID: \`${ctx.from.id}\`\n` +
-            `👤 Nama: ${ctx.from.first_name}\n` +
+            `🏷 Ref Code: \`${user.ref_code}\`\n` +
+            `👥 Referral: ${user.referrals} orang\n\n` +
             `💰 Saldo: *${user.balance} Koin*\n` +
             `🔰 Status: ${status}\n\n` +
-            `_Gunakan saldo untuk generate dokumen._`
+            (user.vip ? `⚡ *Keuntungan VIP:* Diskon 50% semua layanan!` : `_Upgrade VIP untuk diskon 50% biaya layanan!_`)
         );
     });
 
-    // 2. DAILY CHECK-IN
-    bot.hears('📅 Daily Check-in', (ctx) => {
+    bot.hears('📅 Daily Absen', (ctx) => {
         const user = getUser(ctx.from.id);
         const today = new Date().toDateString();
         
-        if (user.dailyLast === today) {
-            return ctx.reply('⚠️ Kamu sudah absen hari ini. Kembali lagi besok!');
+        if (user.daily_last === today) {
+            return ctx.reply('⚠️ Kamu sudah absen hari ini. Balik lagi besok ya!');
         }
 
-        const reward = user.vip ? 500 : 250;
-        updateUser(ctx.from.id, { balance: user.balance + reward, dailyLast: today });
-        ctx.reply(`✅ *Absen Berhasil!*\nBonus harian: +${reward} Koin.\nSaldo sekarang: ${user.balance + reward}`);
+        const baseReward = 250;
+        const reward = user.vip ? baseReward * 2 : baseReward; // VIP dapet 2x lipat
+        
+        updateUser(ctx.from.id, { balance: user.balance + reward, daily_last: today });
+        ctx.reply(`✅ *Absen Berhasil!*\n💰 Dapat: ${reward} Koin\n💳 Total: ${user.balance + reward}`);
     });
 
-    // 3. INFO
-    bot.hears('ℹ️ Info Bot', (ctx) => {
-        ctx.reply(
-            `🤖 *Tentang Bot*\n` +
-            `Bot ini menggunakan teknologi AI untuk generate foto wajah realistis dan Canvas rendering untuk dokumen High-Res.\n\n` +
-            `✅ Support: KTM Indonesia, ID Card Guru Spanyol/UK/Australia.\n` +
-            `📅 Versi: 3.0.0 (Modular System)`
-        );
+    bot.hears('ℹ️ Info', (ctx) => {
+        ctx.reply(`🤖 *Versi Bot: 5.0 (Clean Build)*\n\nBot ini dibuat untuk membantu generate dokumen digital secara instan.`);
     });
-
-    // 4. BANTUAN
+    
     bot.hears('🆘 Bantuan', (ctx) => {
-        ctx.reply(
-            `❓ *PUSAT BANTUAN*\n\n` +
-            `1. *Saldo Habis?* Gunakan Daily Check-in atau tunggu Kode Redeem di channel.\n` +
-            `2. *Gagal Generate?* Pastikan input sesuai format.\n` +
-            `3. *Ingin VIP?* Hubungi admin pemilik bot.\n\n` +
-            `Fitur Canva Education tersedia di menu utama.`
+        ctx.replyWithMarkdown(
+            `*PUSAT BANTUAN*\n\n` +
+            `1. *Cara Ref?* Bagikan link: \`t.me/${ctx.botInfo.username}?start=KODE_REF_KAMU\`\n` +
+            `2. *Saldo Habis?* Ajak teman atau tunggu kode redeem.\n` +
+            `3. *Topup?* Hubungi admin pemilik bot.`
         );
     });
 };

@@ -1,135 +1,87 @@
-import { getUser, updateUser, addCode, getCode, updateCode } from '../lib/db.js';
+import { getUser, updateUser, addCode, updateCode, getCode } from '../lib/db.js';
 
 const ADMIN_ID = parseInt(process.env.OWNER_ID);
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
-// Helper: Membersihkan karakter spesial Markdown agar tidak error
-const escapeMd = (text) => {
-    if (!text) return "";
-    // Mengamankan karakter _, *, [, ], (, ), ~, >, #, +, -, =, |, {, }, ., !
-    return text.toString().replace(/[_*[\]()~>#+=|{}.!-]/g, '\\$&');
-};
-
-// Helper: Masking Nama untuk Privasi
-const maskName = (name) => {
-    if(!name) return "User";
-    // Bersihkan dulu karakter aneh di nama
-    const safeName = name.replace(/[^a-zA-Z0-9 ]/g, ""); 
-    const parts = safeName.split(' ');
-    if(parts.length > 1) {
-        return `${parts[0]} ${parts[1][0]}***`; 
-    }
-    return safeName.substring(0, 3) + "***";
-};
-
-export const broadcastSuccess = async (bot, type, userName, country = "Indonesia") => {
-    if (!CHANNEL_ID) return;
-    
-    // Kita escape (amankan) semua variabel yang masuk
-    const safeType = escapeMd(type);
-    const safeCountry = escapeMd(country);
-    const safeName = escapeMd(maskName(userName));
-
+export const broadcastSuccess = async (telegram, type, name, price) => {
+    if(!CHANNEL_ID) return;
     try {
-        // Gunakan MarkdownV2 yang lebih ketat tapi aman jika di-escape
-        await bot.telegram.sendMessage(CHANNEL_ID, 
-            `🎉 *NEW DOCUMENT GENERATED\\!*\n\n` +
-            `📄 Tipe: ${safeType}\n` +
-            `🌍 Negara: ${safeCountry}\n` +
-            `👤 User: ${safeName}\n` +
-            `✅ Status: Sukses\n\n` +
-            `_Buat dokumen verifikasi kamu sekarang di bot\\!_`, 
-            { parse_mode: 'MarkdownV2' } 
+        await telegram.sendMessage(CHANNEL_ID, 
+            `🎉 *TRANSAKSI SUKSES*\n` +
+            `📂 Fitur: ${type}\n` +
+            `👤 User: ${name.substring(0,3)}***\n` +
+            `💸 Omzet: ${price} Koin`, 
+            { parse_mode: 'Markdown' }
         );
-    } catch (e) { console.error("Broadcast Error:", e.message); }
+    } catch(e) {}
 };
 
 export const setupAdminHandler = (bot) => {
+    // Middleware Cek Admin
     const isAdmin = (ctx, next) => {
         if (ctx.from && ctx.from.id === ADMIN_ID) return next();
     };
 
-    // 1. ADD COIN
+    // 1. TAMBAH KOIN MANUAL
     bot.command('addcoin', isAdmin, (ctx) => {
-        const args = ctx.message.text.split(' ');
-        if (args.length < 3) return ctx.reply('Format: /addcoin [ID] [JUMLAH]');
+        const [_, targetId, amount] = ctx.message.text.split(' ');
+        if (!targetId || !amount) return ctx.reply('/addcoin ID JUMLAH');
         
-        const targetId = parseInt(args[1]);
-        const amount = parseInt(args[2]);
         const user = getUser(targetId);
-        
-        if (!user) return ctx.reply('User tidak ditemukan di database.');
+        if(!user) return ctx.reply('User not found.');
 
-        updateUser(targetId, { balance: user.balance + amount });
-        ctx.reply(`✅ Berhasil tambah ${amount} koin ke ${targetId}`);
-        bot.telegram.sendMessage(targetId, `🎁 Admin mengirimkan ${amount} Koin ke akunmu!`).catch(e => {});
+        updateUser(targetId, { balance: user.balance + parseInt(amount) });
+        ctx.reply(`✅ Added ${amount} coins to ${targetId}`);
+        bot.telegram.sendMessage(targetId, `🎁 Admin menambahkan ${amount} Koin ke akunmu!`);
     });
 
-    // 2. ADD VIP
+    // 2. SET VIP MANUAL
     bot.command('addvip', isAdmin, (ctx) => {
-        const args = ctx.message.text.split(' ');
-        if (args.length < 3) return ctx.reply('Format: /addvip [ID] [HARI]');
-
-        const targetId = parseInt(args[1]);
-        const days = parseInt(args[2]);
-        const expDate = Date.now() + (days * 24 * 60 * 60 * 1000);
-
-        updateUser(targetId, { vip: 1, vip_exp: expDate });
-        ctx.reply(`✅ ${targetId} jadi VIP selama ${days} hari.`);
-        bot.telegram.sendMessage(targetId, `👑 Selamat! Akunmu jadi VIP selama ${days} hari.`).catch(e => {});
+        const [_, targetId, days] = ctx.message.text.split(' ');
+        if (!targetId || !days) return ctx.reply('/addvip ID HARI');
+        
+        const exp = Date.now() + (parseInt(days) * 24 * 60 * 60 * 1000);
+        updateUser(targetId, { vip: 1, vip_exp: exp });
+        ctx.reply(`✅ ${targetId} is now VIP for ${days} days.`);
+        bot.telegram.sendMessage(targetId, `👑 Selamat! Akunmu jadi VIP selama ${days} hari. Diskon 50% aktif!`);
     });
 
-    // 3. CREATE CODE
+    // 3. BUAT KODE REDEEM
     bot.command('newcode', isAdmin, (ctx) => {
-        const args = ctx.message.text.split(' ');
-        if (args.length < 4) return ctx.reply('Format: /newcode [KODE] [VALUE] [LIMIT_USER]');
-
-        const code = args[1].toUpperCase();
-        const val = parseInt(args[2]);
-        const limit = parseInt(args[3]);
-
-        try {
-            addCode(code, val, limit);
-            ctx.reply(`✅ Kode ${code} dibuat. Nilai: ${val}, Limit: ${limit} orang.`);
-
-            if (CHANNEL_ID) {
-                // Escape untuk broadcast kode
-                const safeCode = escapeMd(code);
-                bot.telegram.sendMessage(CHANNEL_ID, 
-                    `🎁 *KODE REDEEM BARU\\!*\n\n` +
-                    `🎟 Kode: \`${safeCode}\`\n` +
-                    `💰 Nilai: ${val} Koin\n` +
-                    `🏃‍♂️ Limit: ${limit} Orang tercepat\\!\n\n` +
-                    `Cara pakai: Buka bot dan ketik /redeem ${safeCode}`,
-                    { parse_mode: 'MarkdownV2' }
-                ).catch(e => {});
-            }
-        } catch (e) {
-            ctx.reply(`❌ Gagal membuat kode: ${e.message}`);
+        const [_, code, val, limit] = ctx.message.text.split(' ');
+        if (!limit) return ctx.reply('/newcode KODE NILAI LIMIT');
+        
+        addCode(code.toUpperCase(), parseInt(val), parseInt(limit));
+        ctx.reply(`✅ Code ${code} created.`);
+        
+        if(CHANNEL_ID) {
+            bot.telegram.sendMessage(CHANNEL_ID, 
+                `🎟 *KODE REDEEM BARU*\n\n` +
+                `Kode: \`${code.toUpperCase()}\`\n` +
+                `Nilai: ${val} Koin\n` +
+                `Limit: ${limit} Orang\n\n` +
+                `_Ketik /redeem ${code.toUpperCase()} di bot sekarang!_`,
+                { parse_mode: 'Markdown' }
+            );
         }
     });
 
-    // 4. REDEEM HANDLER
+    // 4. USER REDEEM
     bot.command('redeem', (ctx) => {
-        const args = ctx.message.text.split(' ');
-        if (args.length < 2) return ctx.reply('⚠️ Format: /redeem KODE');
-
-        const code = args[1].toUpperCase();
-        const codeData = getCode(code);
-
-        if (!codeData) return ctx.reply('❌ Kode tidak valid atau tidak ditemukan.');
-        if (codeData.used_count >= codeData.limit_total) return ctx.reply('❌ Yah, kode sudah habis dipakai orang lain!');
-        if (codeData.claimed_by.includes(ctx.from.id)) return ctx.reply('⚠️ Kamu sudah pakai kode ini.');
+        const code = ctx.message.text.split(' ')[1];
+        if(!code) return ctx.reply('⚠️ Format: /redeem KODE');
+        
+        const data = getCode(code.toUpperCase());
+        if (!data) return ctx.reply('❌ Kode salah.');
+        if (data.used_count >= data.limit_total) return ctx.reply('❌ Kode habis.');
+        if (data.claimed_by.includes(ctx.from.id)) return ctx.reply('⚠️ Sudah pernah redeem.');
 
         const user = getUser(ctx.from.id);
-        updateUser(ctx.from.id, { balance: user.balance + codeData.value });
+        const newClaimers = [...data.claimed_by, ctx.from.id];
         
-        const newClaimed = [...codeData.claimed_by, ctx.from.id];
-        updateCode(code, { 
-            used_count: codeData.used_count + 1,
-            claimed_by: newClaimed
-        });
-
-        ctx.reply(`🎉 *BERHASIL!* Kamu dapat +${codeData.value} Koin.`);
+        updateCode(code.toUpperCase(), { used_count: data.used_count + 1, claimed_by: newClaimers });
+        updateUser(ctx.from.id, { balance: user.balance + data.value });
+        
+        ctx.reply(`🎉 Sukses! +${data.value} Koin.`);
     });
 };
